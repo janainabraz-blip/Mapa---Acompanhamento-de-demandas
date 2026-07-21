@@ -216,22 +216,25 @@ button,.stratchip,.toggle,.clr,.btn2,.stratmk,.leaflet-control-zoom a{touch-acti
   html,body{height:auto!important;overflow:visible!important;position:static!important;background:#fff!important}
   body>*{display:none!important}
   #printReport{display:block!important;color:#15244E;font-family:"Nunito Sans","Segoe UI",system-ui,sans-serif}
-  #printReport .rephead{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #21409A;padding-bottom:10px;margin-bottom:16px}
+  #printReport .rephead{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;border-bottom:3px solid #21409A;padding-bottom:10px;margin-bottom:16px}
   #printReport .rephead h1{font-size:19px;font-weight:900;color:#182F73}
   #printReport .rephead .sub{font-size:11px;color:#5A6785;margin-top:3px}
-  #printReport .repmeta{text-align:right;font-size:10.5px;color:#5A6785}
-  #printReport .repcounter{display:inline-block;margin-bottom:18px;border:1px solid #DDE3F0;border-radius:8px;padding:8px 14px;font-size:11px;color:#5A6785;font-weight:800}
-  #printReport .repcounter b{color:#21409A;font-size:15px;margin-right:3px}
-  #printReport table{width:100%;border-collapse:collapse;font-size:10.5px;page-break-inside:auto}
-  #printReport tr{page-break-inside:avoid;page-break-after:auto}
-  #printReport th{text-align:left;background:#EDF0F8;color:#182F73;font-size:9px;text-transform:uppercase;letter-spacing:.03em;padding:6px 7px;border-bottom:2px solid #C9D3EA}
-  #printReport td{padding:6px 7px;border-bottom:1px solid #E9EDF6;vertical-align:top}
-  #printReport .repfoot{margin-top:16px;font-size:9px;color:#8792AB;text-align:center}
-  #printReport .repmap{margin:0 0 18px;text-align:center;page-break-inside:avoid}
-  #printReport .repmap img{max-width:56%;max-height:190px;border:1px solid #DDE3F0;border-radius:8px}
-  #printReport .repmaplegend{display:flex;justify-content:center;flex-wrap:wrap;gap:9px 16px;margin-top:8px;font-size:9px;color:#5A6785;font-weight:700}
-  #printReport .repmaplegend span{display:inline-flex;align-items:center;gap:4px}
-  #printReport .repmaplegend i{width:9px;height:9px;border-radius:2px;display:inline-block}
+  #printReport .repupdate{flex-shrink:0;text-align:right}
+  #printReport .repupdate .lbl{display:block;font-size:8.5px;letter-spacing:.15em;text-transform:uppercase;color:#5A6785;font-weight:800}
+  #printReport .repupdate .val{display:inline-block;font-size:13px;font-weight:900;margin-top:3px;color:#15244E;
+    padding:1px 6px;box-decoration-break:clone;-webkit-box-decoration-break:clone;
+    background:linear-gradient(transparent 14%, #FFE86B 14%, #FFE86B 88%, transparent 88%);
+    -webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #printReport .repbody::after{content:"";display:block;clear:both}
+  #printReport .repmap{float:left;width:44%;margin:2px 18px 12px 0;page-break-inside:avoid}
+  #printReport .repmap img{width:100%;border:1px solid #DDE3F0;border-radius:8px}
+  #printReport .repitem{padding:7px 0 8px;border-bottom:1px solid #E9EDF6;page-break-inside:avoid}
+  #printReport .repitem .mun{font-weight:900;color:#182F73;font-size:11px}
+  #printReport .repitem .mun .star{color:#D9820B}
+  #printReport .repitem .stat{font-size:9.5px;color:#5A6785;margin:1px 0 3px;font-weight:700}
+  #printReport .repitem .obs{font-size:10px;color:#15244E;line-height:1.4}
+  #printReport .repitem .obs .empty{color:#8792AB}
+  #printReport .repfoot{clear:both;margin-top:16px;font-size:9px;color:#8792AB;text-align:center}
 }
 #map.capturing .leaflet-control-zoom,#map.capturing .leaflet-control-attribution{display:none!important}
 </style>
@@ -274,7 +277,7 @@ button,.stratchip,.toggle,.clr,.btn2,.stratmk,.leaflet-control-zoom a{touch-acti
 </div>
 
 <div class="stratbar" id="stratbar" style="display:none">
-  <span class="slab"><span class="st">★</span>Municípios estratégicos</span>
+  <span class="slab">Municípios estratégicos</span>
 </div>
 <div class="stage">
   <div class="mapcard">
@@ -291,7 +294,7 @@ button,.stratchip,.toggle,.clr,.btn2,.stratmk,.leaflet-control-zoom a{touch-acti
       <div class="li"><span class="sw" style="background:#E1A32E"></span>40 – 59%</div>
       <div class="li"><span class="sw" style="background:#C77A1E"></span>abaixo de 40%</div>
       <div class="li"><span class="sw" style="background:#8DC63F"></span>município selecionado</div>
-      <div class="li" style="margin-top:6px;border-top:1px solid var(--hair);padding-top:6px"><span style="color:var(--azul);font-size:13px">★</span> município estratégico</div>
+      <div class="li" style="margin-top:6px;border-top:1px solid var(--hair);padding-top:6px"><span class="sw" style="background:transparent;border:2px solid #15244E"></span>município estratégico</div>
     </div>
     <div class="scrim" id="scrim" onclick="closeDrawer()"></div>
     <aside class="drawer" id="drawer">
@@ -356,21 +359,35 @@ var CANAIS=["Ofício","Reunião presencial","Videoconferência","Telefone","E-ma
  "Associação de moradores","Outro"];
 var STL={recv:"Na fila",prog:"Em andamento",done:"Atendida"};
 var STORAGE_KEY='compesa_demandas_state_v1';
-var EMBEDDED_STATE = /*STATE_START*/null/*STATE_END*/;
+var SEED_KEY=STORAGE_KEY+'_seed';
+var SEED_VERSION = /*SEED_START*/"2026-07-21T17:54"/*SEED_END*/;
+var EMBEDDED_STATE = /*STATE_START*/{"Arcoverde": {"contato": {"status": "sim", "data": "2026-07-18", "canal": "Telefone", "responsavel": "Eduardo Holanda", "obs": "Feito contato direto com o prefeito, que demonstrou interesse em inaugurar a adutora que atende aos bairros de Maria de Fátima e Coliseu (obra já apta a inaugurar, em fase atual de teste). Prefeito ficou de combinar com a Casa Civil uma data para inauguração"}, "demandas": []}, "Camaragibe": {"contato": {"status": "sim", "data": "2026-07-21", "canal": "Telefone", "responsavel": "Eduardo Holanda", "obs": "Feito contato diretamente com o prefeito. Nenhuma demanda imediata. Explicada a interligação da adutora de Viana."}, "demandas": []}, "Jaboatão dos Guararapes": {"contato": {"status": "sim", "data": "2026-07-17", "canal": "Reunião presencial", "responsavel": "Presidente Douglas Nóbrega", "obs": "O presidente esteve na sede da prefeitura de Jaboatão em reunião com o prefeito Mano Medeiros e equipe. Reunião de alinhamento de projetos do município."}, "demandas": []}, "Olinda": {"contato": {"status": "sim", "data": "2026-07-17", "canal": "Telefone", "responsavel": "Presidente Douglas Nóbrega", "obs": "Presidente falou com a prefeita Mirella, resolveu questão apresentada no dia. No dia 21/07, a prefeita enviou algumas pendências com a Compesa, que estão sendo tratadas internamente e junto à BRK"}, "demandas": []}, "Paulista": {"contato": {"status": "sim", "data": "2026-07-21", "canal": "Telefone", "responsavel": "Eduardo Holanda", "obs": "Após tentativas diretas ao telefone do prefeito, falamos com o Sec de Governo(Fabiano), que ficou de transmitir ao prefeito a nossa movimentação. O Sec. falou de umas obras de pavimentação de ruas que irão iniciar na cidade, que poderão ter interseção com a Compesa. Ficou de enviar relação e ponto focal para resolução, caso seja necessário"}, "demandas": []}}/*STATE_END*/;
 
 var STATE={}, MAP, GEO, SEL=null, CURRENT=null;
 var STRAT=["olinda","paulista","jaboatao","igarassu","caruaru","petrolina","salgueiro","arcoverde"];
+var RMR=["recife","jaboatao dos guararapes","olinda","paulista","cabo de santo agostinho","camaragibe","sao lourenco da mata","abreu e lima","igarassu","itapissuma","ipojuca","moreno","aracoiaba","ilha de itamaraca"];
 var stratLayer=null, LAYByName={}, STRAT_FOUND=[], MAINLAND=null, ALL_MUNS=[];
 function norm(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();}
 function isStrat(nome){var n=norm(nome);return STRAT.some(function(s){return n===s||n.indexOf(s+' ')===0;});}
+function isRMR(nome){var n=norm(nome);return RMR.some(function(s){return n===s||n.indexOf(s+' ')===0;});}
 function borderFor(f){return f.properties._strat?{color:'#15244E',weight:1.8}:{color:'#fff',weight:.7};}
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function todayISO(){return new Date().toISOString().slice(0,10);}
 function fmtDate(iso){if(!iso)return'';var p=iso.split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:iso;}
 
-function loadState(){try{var raw=localStorage.getItem(STORAGE_KEY);
+function loadState(){try{
+  var hasEmbedded=EMBEDDED_STATE&&typeof EMBEDDED_STATE==='object';
+  var storedVer=null;try{storedVer=localStorage.getItem(SEED_KEY);}catch(e){}
+  // Nova versão de dados embutidos → limpa lançamentos antigos e recarrega
+  if(hasEmbedded&&SEED_VERSION&&storedVer!==SEED_VERSION){
+    STATE=JSON.parse(JSON.stringify(EMBEDDED_STATE));saveState();
+    try{localStorage.setItem(SEED_KEY,SEED_VERSION);}catch(e){}
+    return;
+  }
+  var raw=localStorage.getItem(STORAGE_KEY);
   if(raw){STATE=JSON.parse(raw)||{};}
-  else if(EMBEDDED_STATE&&typeof EMBEDDED_STATE==='object'){STATE=EMBEDDED_STATE;saveState();}
+  else if(hasEmbedded){STATE=JSON.parse(JSON.stringify(EMBEDDED_STATE));saveState();
+    if(SEED_VERSION){try{localStorage.setItem(SEED_KEY,SEED_VERSION);}catch(e){}}}
  }catch(e){console.error('Falha ao carregar dados salvos',e);STATE={};}}
 function saveState(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(STATE));}catch(e){console.error('Falha ao salvar dados',e);}}
 function ensureMun(nome){if(!STATE[nome])STATE[nome]={contato:{status:'nao',data:'',canal:'',responsavel:'',obs:''},demandas:[]};if(!STATE[nome].demandas)STATE[nome].demandas=[];if(!STATE[nome].contato)STATE[nome].contato={status:'nao',data:'',canal:'',responsavel:'',obs:''};return STATE[nome];}
@@ -440,14 +457,8 @@ function buildStrategic(){
   STRAT_FOUND=[];
   GEO.eachLayer(function(l){
     if(!l.feature.properties._strat)return;
-    var nome=l.feature.properties._nome, c=l.getBounds().getCenter();
+    var nome=l.feature.properties._nome;
     STRAT_FOUND.push(nome);
-    var mk=L.marker(c,{icon:L.divIcon({className:'stratmk',html:'<div class="wrap"><span class="pin">★</span></div>',iconSize:[0,0]}),zIndexOffset:1000,riseOnHover:true});
-    mk.on('mouseover',function(e){var st=STATE[nome],sim=st.contato.status==='sim',aa=st.demandas,pp=pct(aa);
-      var sub= !sim?'Não contactado':(aa.length?(aa.length+' demanda'+(aa.length!==1?'s':'')+(pp!==null?' · '+pp+'% atendidas':'')):'Contactado · sem demandas ainda');
-      mk.bindTooltip('<b>'+nome+'</b> <span style="opacity:.72;font-weight:700">★ estratégico</span><br><span style="font-size:11px;opacity:.85">'+sub+'</span>',{className:'mtip',direction:'top',offset:[0,-11]}).openTooltip(e.latlng);});
-    mk.on('click',function(){focusMun(nome);});
-    stratLayer.addLayer(mk);
   });
   var order={};STRAT.forEach(function(s,i){order[s]=i;});
   STRAT_FOUND.sort(function(a,b){var na=norm(a),nb=norm(b);
@@ -456,7 +467,7 @@ function buildStrategic(){
   var bar=document.getElementById('stratbar');
   STRAT_FOUND.forEach(function(nome){
     var b=document.createElement('button');b.className='stratchip';
-    b.innerHTML='<span class="pin">★</span>'+nome;
+    b.textContent=nome;
     b.onclick=function(){focusMun(nome);};
     bar.appendChild(b);
   });
@@ -483,7 +494,7 @@ function openDrawer(nome){CURRENT=nome;ensureMun(nome);
   document.getElementById('drawer').classList.add('on');document.getElementById('scrim').classList.add('on');
   lockBodyScroll();}
 function refreshMeta(){var st=STATE[CURRENT],sim=st.contato.status==='sim';
-  document.getElementById('dMeta').innerHTML='<span class="badgecon '+(sim?'sim':'nao')+'">'+(sim?'✓ Contactado':'○ Não contactado')+'</span>'+(isStrat(CURRENT)?' <span style="color:var(--verde);font-weight:800;margin-left:4px">★ estratégico</span>':'');}
+  document.getElementById('dMeta').innerHTML='<span class="badgecon '+(sim?'sim':'nao')+'">'+(sim?'✓ Contactado':'○ Não contactado')+'</span>'+(isStrat(CURRENT)?' <span style="color:var(--verde);font-weight:800;margin-left:4px">estratégico</span>':'');}
 function renderDrawerBody(){var st=STATE[CURRENT];
   document.getElementById('dContato').innerHTML=contatoHTML(CURRENT);
   renderMini();
@@ -597,19 +608,51 @@ document.addEventListener('click',function(e){
   if(wrap&&!wrap.contains(e.target))closeSearchDropdown();
 });
 
-function generateSharableCopy(btn){
+async function generateSharableCopy(btn){
+  var marker=/\/\*STATE_START\*\/[\s\S]*?\/\*STATE_END\*\//;
+  if(!marker.test(ORIGINAL_HTML)){alert('Não foi possível gerar o arquivo: marcador de dados não encontrado.');return;}
+  var out='<!DOCTYPE html>\n'+ORIGINAL_HTML.replace(marker,'/*STATE_START*/'+JSON.stringify(STATE)+'/*STATE_END*/');
+  var seedMarker=/\/\*SEED_START\*\/[\s\S]*?\/\*SEED_END\*\//;
+  if(seedMarker.test(out)){out=out.replace(seedMarker,'/*SEED_START*/'+JSON.stringify(new Date().toISOString())+'/*SEED_END*/');}
+  var fname='compesa_consulta_municipios_'+todayISO()+'.html';
+  function ok(txt){if(btn){var orig=btn.getAttribute('data-orig')||btn.textContent;btn.setAttribute('data-orig',orig);btn.textContent=txt;setTimeout(function(){btn.textContent=orig;},1800);}}
+
+  // Caminho 1 — iOS / Android: compartilhar o arquivo pelo menu nativo (salvar em Arquivos, enviar por e-mail/WhatsApp, etc.)
   try{
-    var marker=/\/\*STATE_START\*\/[\s\S]*?\/\*STATE_END\*\//;
-    if(!marker.test(ORIGINAL_HTML)){alert('Não foi possível gerar o arquivo: marcador de dados não encontrado.');return;}
-    var out='<!DOCTYPE html>\n'+ORIGINAL_HTML.replace(marker,'/*STATE_START*/'+JSON.stringify(STATE)+'/*STATE_END*/');
+    if(navigator.canShare){
+      var file=new File([out],fname,{type:'text/html'});
+      if(navigator.canShare({files:[file]})){
+        await navigator.share({files:[file],title:'Consulta aos Municípios · COMPESA'});
+        ok('✓ Compartilhado');return;
+      }
+    }
+  }catch(err){
+    if(err&&err.name==='AbortError')return; // usuário fechou o menu de compartilhamento
+    // qualquer outra falha: segue para os próximos caminhos
+  }
+
+  // Caminho 2 — desktop: download direto
+  try{
     var blob=new Blob([out],{type:'text/html'});
-    var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;
-    a.download='compesa_consulta_municipios_'+todayISO()+'.html';
-    document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
-    if(btn){var orig=btn.textContent;btn.textContent='✓ Baixado';setTimeout(function(){btn.textContent=orig;},1600);}
-  }catch(e){
-    alert('Não foi possível gerar o arquivo automaticamente. Salve este arquivo normalmente (Ctrl/Cmd+S) e envie-o — os dados já ficam salvos nele quando aberto neste navegador.');
-    console.error(e);
+    var url=URL.createObjectURL(blob);var a=document.createElement('a');
+    if('download' in a && !/iPhone|iPad|iPod/i.test(navigator.userAgent)){
+      a.href=url;a.download=fname;
+      document.body.appendChild(a);a.click();a.remove();
+      setTimeout(function(){URL.revokeObjectURL(url);},1500);
+      ok('✓ Baixado');return;
+    }
+    URL.revokeObjectURL(url);
+  }catch(e){console.error(e);}
+
+  // Caminho 3 — fallback (iOS antigo sem Web Share de arquivos): abre em nova aba para usar o botão Compartilhar do Safari
+  try{
+    var blob2=new Blob([out],{type:'text/html'});
+    var url2=URL.createObjectURL(blob2);
+    window.open(url2,'_blank');
+    alert('Toque no botão Compartilhar do navegador e escolha "Salvar em Arquivos" (ou envie por e-mail/WhatsApp) para guardar esta cópia já com os dados.');
+  }catch(e2){
+    alert('Não foi possível gerar o arquivo automaticamente. Salve esta página normalmente e envie-a — os dados já ficam salvos nela quando aberta neste navegador.');
+    console.error(e2);
   }
 }
 
@@ -674,18 +717,6 @@ function capturarMapaImg(){
           });
         }
 
-        if(stratLayer){
-          stratLayer.eachLayer(function(mk){
-            var pt=MAP.latLngToContainerPoint(mk.getLatLng());
-            var cx=pt.x*scale,cy=pt.y*scale,raio=9.5*scale;
-            ctx.beginPath();ctx.arc(cx,cy,raio,0,2*Math.PI);
-            ctx.fillStyle='#21409A';ctx.fill();
-            ctx.lineWidth=Math.max(1,scale);ctx.strokeStyle='#fff';ctx.stroke();
-            ctx.fillStyle='#fff';ctx.font=(raio*1.15)+'px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
-            ctx.fillText('★',cx,cy+raio*0.05);
-          });
-        }
-
         mapEl.classList.remove('capturing');
         try{
           var dataUrl=canvas.toDataURL('image/png');
@@ -707,21 +738,25 @@ function capturarMapaImg(){
 function exportarRelatorioPDF(btn){
   var nomes=Object.keys(STATE);
   if(!nomes.length){alert('Ainda não há municípios carregados. Aguarde o mapa carregar e tente novamente.');return;}
-  nomes.sort(function(a,b){return norm(a).localeCompare(norm(b));});
+  nomes.sort(function(a,b){
+    var ra=isRMR(a)?0:1, rb=isRMR(b)?0:1;
+    if(ra!==rb)return ra-rb;
+    return norm(a).localeCompare(norm(b));
+  });
 
-  var contactados=0;
   var linhas=nomes.map(function(nome){
     var st=STATE[nome],sim=st.contato.status==='sim',a=st.demandas||[];
-    if(sim)contactados++;
     if(!sim&&!a.length)return null;
 
     var contatoInfo=sim?
       ('Contactado'+(st.contato.data?' em '+fmtDate(st.contato.data):'')+(st.contato.canal?' · '+esc(st.contato.canal):'')+(st.contato.responsavel?' · '+esc(st.contato.responsavel):'')):
       'Não contactado';
 
-    var obsHTML=(st.contato.obs&&st.contato.obs.trim())?esc(st.contato.obs).replace(/\n/g,'<br>'):'<span style="color:#8792AB">Nenhuma observação registrada</span>';
+    var obsHTML=(st.contato.obs&&st.contato.obs.trim())?esc(st.contato.obs).replace(/\n/g,'<br>'):'<span class="empty">Nenhuma observação registrada</span>';
 
-    return '<tr><td><b>'+esc(nome)+'</b>'+(isStrat(nome)?' ★':'')+'</td><td>'+contatoInfo+'</td><td>'+obsHTML+'</td></tr>';
+    return '<div class="repitem"><div class="mun">'+esc(nome)+'</div>'+
+           '<div class="stat">'+contatoInfo+'</div>'+
+           '<div class="obs">'+obsHTML+'</div></div>';
   }).filter(Boolean);
 
   if(!linhas.length){alert('Não há dados de contato ou demandas registrados ainda para incluir no relatório.');return;}
@@ -736,25 +771,16 @@ function exportarRelatorioPDF(btn){
     var horaStr=agora.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
 
     var mapaHTML=imgDataUrl?
-      ('<div class="repmap"><img src="'+imgDataUrl+'" alt="Mapa dos municípios"/>'+
-        '<div class="repmaplegend">'+
-          '<span><i style="background:#C3CCDD"></i>Não contactado</span>'+
-          '<span><i style="background:#6FCF57"></i>Contactado · sem demandas</span>'+
-          '<span><i style="background:#1E7A52"></i>≥80% atendidas</span>'+
-          '<span><i style="background:#3BA76B"></i>60–79%</span>'+
-          '<span><i style="background:#E1A32E"></i>40–59%</span>'+
-          '<span><i style="background:#C77A1E"></i>&lt;40%</span>'+
-        '</div></div>'):
+      ('<div class="repmap"><img src="'+imgDataUrl+'" alt="Mapa dos municípios"/></div>'):
       ('<div class="repmap" style="font-size:10.5px;color:#C0392B">Não foi possível gerar a imagem do mapa neste navegador.<br><b>Detalhe do erro:</b> '+esc(mapaCapt.err||'desconhecido')+'</div>');
 
     var html='<div class="rephead"><div><h1>COMPESA · Relatório de Consulta aos Municípios</h1>'+
       '<div class="sub">Situação de contato e demandas apresentadas por município</div></div>'+
-      '<div class="repmeta">Gerado em '+dataStr+' às '+horaStr+'</div></div>'+
-      '<div class="repcounter"><b>'+contactados+'/'+nomes.length+'</b> municípios contactados</div>'+
-      mapaHTML+
-      '<table><thead><tr><th style="width:19%">Município</th><th style="width:26%">Contato</th><th>Observações</th></tr></thead><tbody>'+
-      linhas.join('')+
-      '</tbody></table>'+
+      '<div class="repupdate"><span class="lbl">Atualização</span><span class="val">'+dataStr+' · '+horaStr+'</span></div></div>'+
+      '<div class="repbody">'+
+        mapaHTML+
+        linhas.join('')+
+      '</div>'+
       '<div class="repfoot">Relatório gerado automaticamente a partir dos dados registrados no painel de acompanhamento.</div>';
 
     document.getElementById('printReport').innerHTML=html;
