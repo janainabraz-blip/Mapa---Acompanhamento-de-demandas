@@ -34,13 +34,11 @@ body{
 }
 @supports (min-height:100dvh){body{min-height:100dvh}}
 body.drawer-open{overflow:hidden}
-/* ---------- Ajustes específicos para Safari/iOS ---------- */
 @supports (-webkit-touch-callout:none){
-  .inp,.sel,.contxt,.consel,.contxtarea,.cststatus{font-size:16px!important} /* evita zoom automático ao focar campos */
+  .inp,.sel,.contxt,.consel,.contxtarea,.cststatus{font-size:16px!important}
 }
 button,.stratchip,.toggle,.clr,.btn2,.stratmk,.leaflet-control-zoom a{touch-action:manipulation}
 .top{padding-top:calc(15px + env(safe-area-inset-top))}
-/* ---------- Cabeçalho ---------- */
 .top{position:relative;flex-shrink:0;color:#fff;padding:15px 28px 16px;overflow:hidden;
   background:linear-gradient(118deg,var(--azul-d) 0%,var(--azul) 58%,var(--azul-md) 100%)}
 .top::before{content:"";position:absolute;right:-50px;top:-90px;width:270px;height:270px;border-radius:50%;border:38px solid rgba(141,198,63,.16)}
@@ -58,7 +56,6 @@ button,.stratchip,.toggle,.clr,.btn2,.stratmk,.leaflet-control-zoom a{touch-acti
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(141,198,63,.55)}70%{box-shadow:0 0 0 8px rgba(141,198,63,0)}100%{box-shadow:0 0 0 0 rgba(141,198,63,0)}}
 .stamp .clock{font-size:19px;font-weight:800;margin-top:3px}
 .stamp .date{font-size:10.5px;color:rgba(255,255,255,.55);margin-top:1px}
-/* ---------- Controles ---------- */
 .controls{display:flex;align-items:center;gap:12px;padding:0 28px 15px;flex-wrap:wrap;flex-shrink:0}
 .admintools{flex-shrink:0;padding:16px 28px 20px;margin:0 28px 24px;border-top:1px dashed var(--hair);}
 .atlabel{font-size:10.5px;font-weight:800;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
@@ -88,7 +85,6 @@ button,.stratchip,.toggle,.clr,.btn2,.stratmk,.leaflet-control-zoom a{touch-acti
 .toggle input:checked + .switch{background:var(--verde-d)}
 .toggle input:checked + .switch::after{transform:translateX(14px)}
 .clr{font-size:11.5px;font-weight:700;color:var(--azul);cursor:pointer;padding:7px 11px;border:1px solid var(--azul);border-radius:10px;background:transparent;display:none}
-/* ---------- Palco do mapa ---------- */
 .stage{flex-shrink:0;height:66vh;min-height:440px;max-height:720px;padding:0 28px 24px;display:flex}
 .mapcard{flex:1;position:relative;border-radius:20px;overflow:hidden;background:var(--surface);
   box-shadow:0 18px 44px rgba(33,64,154,.13);border:1px solid var(--hair)}
@@ -102,8 +98,6 @@ button,.stratchip,.toggle,.clr,.btn2,.stratmk,.leaflet-control-zoom a{touch-acti
 .leg .li:last-child{margin-bottom:0}
 .leg .sw{width:14px;height:14px;border-radius:4px;flex-shrink:0}
 .legtoggle{display:none}
-
-/* Barra de municípios estratégicos */
 .stratbar{display:flex;align-items:center;gap:9px;padding:0 28px 15px;flex-wrap:wrap;flex-shrink:0}
 .stratbar .slab{font-size:11px;font-weight:800;color:var(--ink2);text-transform:uppercase;letter-spacing:.03em;display:inline-flex;align-items:center;gap:6px}
 .stratbar .slab .st{color:var(--verde-d)}
@@ -112,7 +106,6 @@ button,.stratchip,.toggle,.clr,.btn2,.stratmk,.leaflet-control-zoom a{touch-acti
 .stratchip:hover{background:var(--azul);color:#fff;border-color:var(--azul)}
 .stratchip .pin{width:16px;height:16px;border-radius:50%;background:var(--verde);color:#15244E;display:inline-flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0}
 .stratchip:hover .pin{background:#fff}
-/* Marcador estratégico no mapa */
 .stratmk{background:transparent;border:none}
 .stratmk .wrap{display:flex;align-items:center;gap:5px;transform:translate(-9px,-9px);pointer-events:auto;cursor:pointer}
 .stratmk .pin{width:19px;height:19px;border-radius:50%;background:var(--azul);border:2px solid #fff;color:#fff;
@@ -127,7 +120,6 @@ button,.stratchip,.toggle,.clr,.btn2,.stratmk,.leaflet-control-zoom a{touch-acti
 .leaflet-control-zoom a:last-child{border-radius:0 0 9px 9px!important}
 .leaflet-control-zoom a:hover{background:var(--azul-l)!important;color:var(--azul)!important}
 .leaflet-control-attribution{font-size:9px!important;background:rgba(255,255,255,.75)!important}
-/* ---------- Gaveta ---------- */
 .scrim{position:absolute;inset:0;z-index:700;background:rgba(21,36,78,.14);opacity:0;pointer-events:none;transition:opacity .25s}
 .scrim.on{opacity:1;pointer-events:auto}
 .drawer{position:absolute;top:0;right:0;bottom:0;width:394px;max-width:92%;z-index:800;background:var(--surface);
@@ -158,7 +150,6 @@ button,.stratchip,.toggle,.clr,.btn2,.stratmk,.leaflet-control-zoom a{touch-acti
 .cmeta b{color:var(--ink2);font-weight:800}
 .dempty{text-align:center;color:var(--ink3);font-size:12.5px;padding:2.4rem 1rem;font-style:italic}
 .foot{flex-shrink:0;text-align:center;font-size:10px;color:var(--ink3);padding:9px 20px;font-weight:600;border-top:1px solid var(--hair2)}
-/* ---------- Contato e nova demanda ---------- */
 .badgecon{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:800;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.02em}
 .badgecon.sim{background:rgba(141,198,63,.25);color:#eafccb}
 .badgecon.nao{background:rgba(255,255,255,.16);color:rgba(255,255,255,.85)}
@@ -189,49 +180,36 @@ button,.stratchip,.toggle,.clr,.btn2,.stratmk,.leaflet-control-zoom a{touch-acti
 .btn2.danger{color:var(--receb);border-color:var(--receb)}
 .btn2.danger:hover{background:var(--receb);color:#fff}
 @media(max-width:840px){
-  /* No celular o modelo "tudo numa tela fixa" espreme o mapa; voltamos ao fluxo
-     normal com rolagem vertical e damos ao mapa uma altura própria e utilizável. */
-
   .top{padding:12px 15px 13px}
   .top .row{gap:12px}
   .logomark{height:40px}.brand .divider{height:38px}
   .title{font-size:17px}
-  .subtitle{display:none} /* subtítulo longo ocupava ~6 linhas no celular */
+  .subtitle{display:none}
   .stamp .clock{font-size:15px}
   .stamp .live{font-size:9px}
-
   .controls{padding:11px 15px 12px;gap:12px;flex-direction:column;align-items:stretch}
   .controls .ctl{width:100%;flex-wrap:wrap;gap:8px}
   .controls .ctl label{flex:1 0 100%;margin-bottom:2px}
-  .inp{min-width:0;flex:1;font-size:16px} /* 16px evita o zoom automático ao focar no iOS */
+  .inp{min-width:0;flex:1;font-size:16px}
   .sel{flex:1;min-width:0;font-size:16px}
   .impexp{width:100%;gap:8px}
   .impexp .btn2{flex:1 1 100%;text-align:center;padding:11px}
-
-  /* chips de estratégicos em uma linha rolável, em vez de várias linhas empilhadas */
   .stratbar{padding:0 15px 12px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
   .stratbar::-webkit-scrollbar{display:none}
   .stratbar .slab,.stratchip{flex-shrink:0}
-
   .stage{padding:0 15px 18px;display:block;flex:none}
   .mapcard{height:60vh;min-height:360px;border-radius:16px}
-
-  /* legenda: some por padrão no celular (cobria o mapa); abre sob toque */
   .legtoggle{display:flex;align-items:center;gap:5px;position:absolute;bottom:14px;left:14px;z-index:601;
     background:rgba(255,255,255,.94);border:1px solid var(--hair);border-radius:20px;padding:8px 13px;
     font-size:11.5px;font-weight:800;color:var(--ink2);box-shadow:0 3px 10px rgba(33,64,154,.14)}
   .leg{display:none;bottom:56px;max-width:78vw;max-height:44vh;overflow-y:auto}
   .leg.on{display:block}
-
-  /* gaveta vira folha inferior fixa na viewport (funciona mesmo com a página rolada) */
   .scrim{position:fixed;inset:0}
   .drawer{position:fixed;left:0;right:0;bottom:0;top:10vh;top:10dvh;width:100%;max-width:100%;height:auto;max-height:none;
     transform:translateY(103%);border-left:none;border-radius:20px 20px 0 0;padding-bottom:env(safe-area-inset-bottom)}
   .drawer.on{transform:translateY(0)}
 }
 @media(prefers-reduced-motion:reduce){.dot{animation:none}}
-
-/* ---------- Relatório para exportação em PDF ---------- */
 #printReport{display:none}
 @media print{
   @page{margin:14mm}
@@ -242,20 +220,12 @@ button,.stratchip,.toggle,.clr,.btn2,.stratmk,.leaflet-control-zoom a{touch-acti
   #printReport .rephead h1{font-size:19px;font-weight:900;color:#182F73}
   #printReport .rephead .sub{font-size:11px;color:#5A6785;margin-top:3px}
   #printReport .repmeta{text-align:right;font-size:10.5px;color:#5A6785}
-  #printReport .repsum{display:flex;gap:10px;margin-bottom:18px}
-  #printReport .repsum .box{flex:1;border:1px solid #DDE3F0;border-radius:8px;padding:8px 10px}
-  #printReport .repsum .box .n{font-size:18px;font-weight:900;color:#21409A}
-  #printReport .repsum .box .l{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8792AB;font-weight:800}
+  #printReport .repcounter{display:inline-block;margin-bottom:18px;border:1px solid #DDE3F0;border-radius:8px;padding:8px 14px;font-size:11px;color:#5A6785;font-weight:800}
+  #printReport .repcounter b{color:#21409A;font-size:15px;margin-right:3px}
   #printReport table{width:100%;border-collapse:collapse;font-size:10.5px;page-break-inside:auto}
   #printReport tr{page-break-inside:avoid;page-break-after:auto}
   #printReport th{text-align:left;background:#EDF0F8;color:#182F73;font-size:9px;text-transform:uppercase;letter-spacing:.03em;padding:6px 7px;border-bottom:2px solid #C9D3EA}
   #printReport td{padding:6px 7px;border-bottom:1px solid #E9EDF6;vertical-align:top}
-  #printReport .mundemandas{margin:2px 0 0;padding-left:14px}
-  #printReport .mundemandas li{margin-bottom:2px}
-  #printReport .tag{display:inline-block;font-size:8.5px;font-weight:800;text-transform:uppercase;padding:1px 6px;border-radius:8px}
-  #printReport .tag.done{background:#E6F6EF;color:#1E9B6E}
-  #printReport .tag.prog{background:#FDF3E4;color:#D9820B}
-  #printReport .tag.recv{background:#FCEEEC;color:#C0392B}
   #printReport .repfoot{margin-top:16px;font-size:9px;color:#8792AB;text-align:center}
   #printReport .repmap{margin:0 0 18px;text-align:center;page-break-inside:avoid}
   #printReport .repmap img{max-width:56%;max-height:190px;border:1px solid #DDE3F0;border-radius:8px}
@@ -359,13 +329,12 @@ button,.stratchip,.toggle,.clr,.btn2,.stratmk,.leaflet-control-zoom a{touch-acti
 <div id="printReport"></div>
 
 <script>
-var ORIGINAL_HTML=document.documentElement.outerHTML; /* cópia intocada da página, capturada antes de qualquer alteração via JS */
+var ORIGINAL_HTML=document.documentElement.outerHTML;
 function tick(){var d=new Date();
   document.getElementById('clock').textContent=d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
   document.getElementById('date').textContent=d.toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});}
 tick();setInterval(tick,20000);
 
-// trava a rolagem de fundo com segurança no Safari iOS (overflow:hidden sozinho não é suficiente lá)
 var _scrollY=0;
 function lockBodyScroll(){_scrollY=window.scrollY||document.documentElement.scrollTop||0;
   document.body.style.position='fixed';document.body.style.top=(-_scrollY)+'px';
@@ -374,7 +343,6 @@ function unlockBodyScroll(){document.body.style.position='';document.body.style.
   document.body.style.left='';document.body.style.right='';document.body.classList.remove('drawer-open');
   window.scrollTo(0,_scrollY);}
 
-// mantém o mapa com o tamanho correto ao girar a tela / redimensionar
 window.addEventListener('resize',function(){if(window.MAP&&MAP.invalidateSize)MAP.invalidateSize();});
 window.addEventListener('orientationchange',function(){setTimeout(function(){if(window.MAP&&MAP.invalidateSize)MAP.invalidateSize();},300);});
 
@@ -440,13 +408,11 @@ function buildMap(geo,nomeById){var feats=geo.features||[];
     layer.on('click',function(){selectMun(layer,nome);});
     LAYByName[nome]=layer;
   }}).addTo(MAP);
-  // Enquadra o PE continental (exclui Fernando de Noronha, que fica no oceano)
   MAINLAND=L.latLngBounds([]);
   GEO.eachLayer(function(l){if(norm(l.feature.properties._nome).indexOf('fernando de noronha')<0)MAINLAND.extend(l.getBounds());});
   MAP.fitBounds(MAINLAND,{padding:[14,14]});
   buildStrategic();renderKPIs();populateMunClearSelect(feats);
   HUD.textContent=feats.length+' municípios · clique para registrar contato e demandas';
-  // garante que o Leaflet leia a altura real do contêiner (essencial no celular)
   setTimeout(function(){MAP.invalidateSize();if(MAINLAND&&MAINLAND.isValid())MAP.fitBounds(MAINLAND,{padding:[14,14]});},250);
 }
 
@@ -483,7 +449,6 @@ function buildStrategic(){
     mk.on('click',function(){focusMun(nome);});
     stratLayer.addLayer(mk);
   });
-  // ordena chips conforme a lista informada
   var order={};STRAT.forEach(function(s,i){order[s]=i;});
   STRAT_FOUND.sort(function(a,b){var na=norm(a),nb=norm(b);
     function idx(n){for(var i=0;i<STRAT.length;i++){if(n===STRAT[i]||n.indexOf(STRAT[i]+' ')===0)return i;}return 99;}
@@ -503,7 +468,7 @@ function focusMun(nome){
   MAP.fitBounds(l.getBounds(),{padding:[80,80],maxZoom:11});
 }
 
-function renderKPIs(){/* quadros de KPIs removidos */}
+function renderKPIs(){}
 function canalOptions(sel){return '<option value="">Selecione…</option>'+CANAIS.map(function(c){return '<option value="'+esc(c)+'"'+(c===sel?' selected':'')+'>'+esc(c)+'</option>';}).join('');}
 function statusOptions(sel){return ['recv','prog','done'].map(function(k){return '<option value="'+k+'"'+(k===sel?' selected':'')+'>'+STL[k]+'</option>';}).join('');}
 var SELCOR='#8DC63F';
@@ -548,7 +513,7 @@ function saveContato(btn){if(!CURRENT)return;ensureMun(CURRENT);var c=STATE[CURR
   if(btn){var orig=btn.textContent;btn.textContent='✓ Salvo';btn.disabled=true;
     clearTimeout(btn._t);btn._t=setTimeout(function(){btn.textContent=orig;btn.disabled=false;},1400);}}
 
-function renderMini(){/* mini-resumo removido */}
+function renderMini(){}
 
 function newDemandaHTML(){return '<details class="newdemanda" id="ndBox"><summary>+ Registrar nova demanda</summary><div class="body">'+
    '<div class="confield"><label>Tipo de demanda</label><input list="tiposList" class="contxt" id="ndTipo" placeholder="Ex.: Expansão de rede de água"></div>'+
@@ -605,7 +570,6 @@ function searchMun(){var q=document.getElementById('fSearch').value.toLowerCase(
 function clearSearch(){document.getElementById('fSearch').value='';document.getElementById('clrBtn').style.display='none';
   resetColors();refreshSelColor();closeSearchDropdown();if(MAINLAND)MAP.fitBounds(MAINLAND,{padding:[14,14]});}
 
-/* ---------- Lista suspensa de busca ---------- */
 function renderSearchDropdown(q){
   var el=document.getElementById('searchDrop');if(!el)return;
   var nq=norm(q||'');
@@ -633,7 +597,6 @@ document.addEventListener('click',function(e){
   if(wrap&&!wrap.contains(e.target))closeSearchDropdown();
 });
 
-/* ---------- Gerar cópia com os dados para compartilhar ---------- */
 function generateSharableCopy(btn){
   try{
     var marker=/\/\*STATE_START\*\/[\s\S]*?\/\*STATE_END\*\//;
@@ -651,12 +614,23 @@ function generateSharableCopy(btn){
 }
 
 /* ---------- Exportar relatório em PDF ---------- */
+/* Captura o mapa desenhando tiles (posição real na tela) + polígonos dos municípios e
+   marcadores estratégicos (via projeção latLngToContainerPoint do próprio Leaflet, o
+   que garante alinhamento perfeito sem depender de nenhuma biblioteca externa). */
+function ringsFromLatLngs(latlngs){
+  var rings=[];
+  (function walk(arr){
+    if(!arr||!arr.length)return;
+    if(arr[0]&&typeof arr[0].lat==='number'){rings.push(arr);return;}
+    arr.forEach(walk);
+  })(latlngs);
+  return rings;
+}
 function capturarMapaImg(){
   var mapEl=document.getElementById('map');
-  if(!mapEl)return Promise.resolve(null);
+  if(!mapEl)return Promise.resolve({url:null,err:'Elemento do mapa não encontrado na página.'});
   mapEl.classList.add('capturing');
   return new Promise(function(resolve){
-    // pequena pausa para garantir que os tiles terminaram de renderizar antes da captura
     setTimeout(function(){
       try{
         var scale=2;
@@ -668,50 +642,63 @@ function capturarMapaImg(){
         ctx.fillStyle='#E6EDF5';
         ctx.fillRect(0,0,canvas.width,canvas.height);
 
-        // 1) tiles do mapa-base — posicionados pela posição final real na tela (getBoundingClientRect),
-        //    o que evita o deslocamento causado por tentar reinterpretar os transforms do Leaflet
         mapEl.querySelectorAll('img.leaflet-tile-loaded').forEach(function(img){
           var r=img.getBoundingClientRect();
           if(r.right<=mapRect.left||r.left>=mapRect.right||r.bottom<=mapRect.top||r.top>=mapRect.bottom)return;
-          try{ctx.drawImage(img,(r.left-mapRect.left)*scale,(r.top-mapRect.top)*scale,r.width*scale,r.height*scale);}catch(e){}
+          try{ctx.drawImage(img,(r.left-mapRect.left)*scale,(r.top-mapRect.top)*scale,r.width*scale,r.height*scale);}
+          catch(errTile){console.error('Erro ao desenhar tile do mapa',errTile);}
         });
 
-        function desenharMarcadoresEFinalizar(){
-          // 3) marcadores estratégicos (pino azul com estrela)
-          mapEl.querySelectorAll('.stratmk .pin').forEach(function(pin){
-            var pr=pin.getBoundingClientRect();
-            var cx=(pr.left+pr.width/2-mapRect.left)*scale,cy=(pr.top+pr.height/2-mapRect.top)*scale;
-            var raio=(pr.width/2)*scale;
+        if(GEO){
+          GEO.eachLayer(function(layer){
+            if(!layer.getLatLngs)return;
+            var rings=ringsFromLatLngs(layer.getLatLngs());
+            if(!rings.length)return;
+            var op=layer.options||{};
+            ctx.beginPath();
+            rings.forEach(function(ring){
+              ring.forEach(function(ll,i){
+                var pt=MAP.latLngToContainerPoint(ll);
+                var x=pt.x*scale,y=pt.y*scale;
+                if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+              });
+              ctx.closePath();
+            });
+            if(op.fillColor){
+              ctx.globalAlpha=(op.fillOpacity!=null?op.fillOpacity:1);
+              ctx.fillStyle=op.fillColor;ctx.fill('evenodd');ctx.globalAlpha=1;
+            }
+            if(op.color&&op.weight){
+              ctx.strokeStyle=op.color;ctx.lineWidth=Math.max(1,op.weight*scale);ctx.stroke();
+            }
+          });
+        }
+
+        if(stratLayer){
+          stratLayer.eachLayer(function(mk){
+            var pt=MAP.latLngToContainerPoint(mk.getLatLng());
+            var cx=pt.x*scale,cy=pt.y*scale,raio=9.5*scale;
             ctx.beginPath();ctx.arc(cx,cy,raio,0,2*Math.PI);
             ctx.fillStyle='#21409A';ctx.fill();
             ctx.lineWidth=Math.max(1,scale);ctx.strokeStyle='#fff';ctx.stroke();
             ctx.fillStyle='#fff';ctx.font=(raio*1.15)+'px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
             ctx.fillText('★',cx,cy+raio*0.05);
           });
-          mapEl.classList.remove('capturing');
-          resolve(canvas.toDataURL('image/png'));
         }
 
-        // 2) polígonos dos municípios — o Leaflet desenha isso como SVG; rasterizamos
-        //    o SVG só neste momento (sem alterar como o mapa se comporta na tela/celular)
-        var svgEl=mapEl.querySelector('.leaflet-overlay-pane svg');
-        if(svgEl){
-          var xml=new XMLSerializer().serializeToString(svgEl);
-          var svgImg=new Image();
-          svgImg.onload=function(){
-            var vr=svgEl.getBoundingClientRect();
-            try{ctx.drawImage(svgImg,(vr.left-mapRect.left)*scale,(vr.top-mapRect.top)*scale,vr.width*scale,vr.height*scale);}catch(e){}
-            desenharMarcadoresEFinalizar();
-          };
-          svgImg.onerror=desenharMarcadoresEFinalizar;
-          svgImg.src='data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(xml)));
-        }else{
-          desenharMarcadoresEFinalizar();
-        }
-      }catch(e){
         mapEl.classList.remove('capturing');
-        console.error('Falha ao capturar o mapa:',e);
-        resolve(null);
+        try{
+          var dataUrl=canvas.toDataURL('image/png');
+          if(!dataUrl||dataUrl.length<1000){resolve({url:null,err:'A captura gerou uma imagem vazia.'});return;}
+          resolve({url:dataUrl,err:null});
+        }catch(errExport){
+          console.error('Falha ao exportar imagem do mapa',errExport);
+          resolve({url:null,err:'Falha ao exportar o mapa (provável bloqueio de segurança do navegador / CORS): '+errExport.message});
+        }
+      }catch(eGeral){
+        mapEl.classList.remove('capturing');
+        console.error('Erro geral na captura do mapa',eGeral);
+        resolve({url:null,err:'Erro geral na captura: '+eGeral.message});
       }
     },350);
   });
@@ -722,23 +709,19 @@ function exportarRelatorioPDF(btn){
   if(!nomes.length){alert('Ainda não há municípios carregados. Aguarde o mapa carregar e tente novamente.');return;}
   nomes.sort(function(a,b){return norm(a).localeCompare(norm(b));});
 
-  var contactados=0,totalDemandas=0,concluidas=0;
+  var contactados=0;
   var linhas=nomes.map(function(nome){
     var st=STATE[nome],sim=st.contato.status==='sim',a=st.demandas||[];
     if(sim)contactados++;
-    totalDemandas+=a.length;
-    concluidas+=a.filter(function(x){return x.status==='done';}).length;
-    if(!sim&&!a.length)return null; // omite municípios sem nenhuma informação lançada
+    if(!sim&&!a.length)return null;
 
     var contatoInfo=sim?
       ('Contactado'+(st.contato.data?' em '+fmtDate(st.contato.data):'')+(st.contato.canal?' · '+esc(st.contato.canal):'')+(st.contato.responsavel?' · '+esc(st.contato.responsavel):'')):
       'Não contactado';
 
-    var demandasHTML=a.length?('<ul class="mundemandas">'+a.map(function(d){
-        return '<li><span class="tag '+d.status+'">'+STL[d.status]+'</span> '+esc(d.tipo)+(d.data?' — '+fmtDate(d.data):'')+'</li>';
-      }).join('')+'</ul>'):'<span style="color:#8792AB">Nenhuma demanda registrada</span>';
+    var obsHTML=(st.contato.obs&&st.contato.obs.trim())?esc(st.contato.obs).replace(/\n/g,'<br>'):'<span style="color:#8792AB">Nenhuma observação registrada</span>';
 
-    return '<tr><td><b>'+esc(nome)+'</b>'+(isStrat(nome)?' ★':'')+'</td><td>'+contatoInfo+'</td><td>'+demandasHTML+'</td></tr>';
+    return '<tr><td><b>'+esc(nome)+'</b>'+(isStrat(nome)?' ★':'')+'</td><td>'+contatoInfo+'</td><td>'+obsHTML+'</td></tr>';
   }).filter(Boolean);
 
   if(!linhas.length){alert('Não há dados de contato ou demandas registrados ainda para incluir no relatório.');return;}
@@ -746,11 +729,11 @@ function exportarRelatorioPDF(btn){
   var origLabel;
   if(btn){origLabel=btn.textContent;btn.textContent='Gerando…';btn.disabled=true;}
 
-  capturarMapaImg().then(function(imgDataUrl){
+  capturarMapaImg().then(function(mapaCapt){
+    var imgDataUrl=mapaCapt.url;
     var agora=new Date();
     var dataStr=agora.toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
     var horaStr=agora.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-    var pctGeral=totalDemandas?Math.round(concluidas/totalDemandas*100):0;
 
     var mapaHTML=imgDataUrl?
       ('<div class="repmap"><img src="'+imgDataUrl+'" alt="Mapa dos municípios"/>'+
@@ -762,19 +745,14 @@ function exportarRelatorioPDF(btn){
           '<span><i style="background:#E1A32E"></i>40–59%</span>'+
           '<span><i style="background:#C77A1E"></i>&lt;40%</span>'+
         '</div></div>'):
-      '<div class="repmap" style="font-size:10.5px;color:#C0392B">Não foi possível gerar a imagem do mapa neste navegador (abra o console para detalhes).</div>';
+      ('<div class="repmap" style="font-size:10.5px;color:#C0392B">Não foi possível gerar a imagem do mapa neste navegador.<br><b>Detalhe do erro:</b> '+esc(mapaCapt.err||'desconhecido')+'</div>');
 
     var html='<div class="rephead"><div><h1>COMPESA · Relatório de Consulta aos Municípios</h1>'+
       '<div class="sub">Situação de contato e demandas apresentadas por município</div></div>'+
       '<div class="repmeta">Gerado em '+dataStr+' às '+horaStr+'</div></div>'+
-      '<div class="repsum">'+
-        '<div class="box"><div class="n">'+contactados+'</div><div class="l">Municípios contactados</div></div>'+
-        '<div class="box"><div class="n">'+totalDemandas+'</div><div class="l">Demandas registradas</div></div>'+
-        '<div class="box"><div class="n">'+concluidas+'</div><div class="l">Demandas atendidas</div></div>'+
-        '<div class="box"><div class="n">'+pctGeral+'%</div><div class="l">Percentual atendido</div></div>'+
-      '</div>'+
+      '<div class="repcounter"><b>'+contactados+'/'+nomes.length+'</b> municípios contactados</div>'+
       mapaHTML+
-      '<table><thead><tr><th style="width:19%">Município</th><th style="width:26%">Contato</th><th>Demandas</th></tr></thead><tbody>'+
+      '<table><thead><tr><th style="width:19%">Município</th><th style="width:26%">Contato</th><th>Observações</th></tr></thead><tbody>'+
       linhas.join('')+
       '</tbody></table>'+
       '<div class="repfoot">Relatório gerado automaticamente a partir dos dados registrados no painel de acompanhamento.</div>';
@@ -785,7 +763,6 @@ function exportarRelatorioPDF(btn){
   });
 }
 
-/* ---------- Limpar dados ---------- */
 function resetData(){if(!confirm('Isso apagará todos os dados salvos neste navegador (contatos e demandas). Deseja continuar?'))return;
   localStorage.removeItem(STORAGE_KEY);STATE={};
   if(GEO)GEO.eachLayer(function(l){ensureMun(l.feature.properties._nome);});
