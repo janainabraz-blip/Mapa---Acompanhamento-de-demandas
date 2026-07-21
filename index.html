@@ -1,16 +1,17 @@
 <!DOCTYPE html>
-<html lang="pt-BR"><head>
+<html lang="pt-BR">
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="format-detection" content="telephone=no,date=no">
 <title>Consulta aos Municípios · COMPESA</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&amp;display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -20,8 +21,7 @@
   --hair:#DDE3F0; --hair2:#E9EDF6;
   --atend:#1E9B6E; --andam:#D9820B; --receb:#C0392B;
 }
-html,body{height:100%;overflow:hidden;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
-@supports (height:100dvh){html,body{height:100dvh}}
+html,body{min-height:100%;-webkit-tap-highlight-color:transparent}
 body{
   font-family:"Nunito Sans","Segoe UI",system-ui,sans-serif;
   color:var(--ink); line-height:1.45; -webkit-font-smoothing:antialiased;
@@ -30,8 +30,10 @@ body{
     radial-gradient(760px 420px at 4% 104%, rgba(33,64,154,.07), transparent 55%),
     var(--bg);
   display:flex; flex-direction:column;
-  position:fixed; inset:0;
+  min-height:100vh;
 }
+@supports (min-height:100dvh){body{min-height:100dvh}}
+body.drawer-open{overflow:hidden}
 /* ---------- Ajustes específicos para Safari/iOS ---------- */
 @supports (-webkit-touch-callout:none){
   .inp,.sel,.contxt,.consel,.contxtarea,.cststatus{font-size:16px!important} /* evita zoom automático ao focar campos */
@@ -58,6 +60,9 @@ button,.stratchip,.toggle,.clr,.btn2,.stratmk,.leaflet-control-zoom a{touch-acti
 .stamp .date{font-size:10.5px;color:rgba(255,255,255,.55);margin-top:1px}
 /* ---------- Controles ---------- */
 .controls{display:flex;align-items:center;gap:12px;padding:0 28px 15px;flex-wrap:wrap;flex-shrink:0}
+.admintools{flex-shrink:0;padding:16px 28px 20px;margin:0 28px 24px;border-top:1px dashed var(--hair);}
+.atlabel{font-size:10.5px;font-weight:800;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.atrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
 .ctl{display:flex;align-items:center;gap:7px}
 .ctl label{font-size:11.5px;color:var(--ink2);font-weight:800}
 .sel,.inp{font-family:inherit;font-size:12.5px;font-weight:600;padding:8px 12px;border-radius:10px;
@@ -74,7 +79,7 @@ button,.stratchip,.toggle,.clr,.btn2,.stratmk,.leaflet-control-zoom a{touch-acti
 .toggle input:checked + .switch::after{transform:translateX(14px)}
 .clr{font-size:11.5px;font-weight:700;color:var(--azul);cursor:pointer;padding:7px 11px;border:1px solid var(--azul);border-radius:10px;background:transparent;display:none}
 /* ---------- Palco do mapa ---------- */
-.stage{flex:1;min-height:0;padding:0 28px 24px;display:flex}
+.stage{flex-shrink:0;height:66vh;min-height:440px;max-height:720px;padding:0 28px 24px;display:flex}
 .mapcard{flex:1;position:relative;border-radius:20px;overflow:hidden;background:var(--surface);
   box-shadow:0 18px 44px rgba(33,64,154,.13);border:1px solid var(--hair)}
 #map{width:100%;height:100%;background:#E6EDF5}
@@ -176,9 +181,6 @@ button,.stratchip,.toggle,.clr,.btn2,.stratmk,.leaflet-control-zoom a{touch-acti
 @media(max-width:840px){
   /* No celular o modelo "tudo numa tela fixa" espreme o mapa; voltamos ao fluxo
      normal com rolagem vertical e damos ao mapa uma altura própria e utilizável. */
-  html,body{position:static;height:auto;min-height:100%;overflow:visible;overflow-y:auto;overscroll-behavior:auto}
-  body{display:block}
-  body.drawer-open{overflow:hidden}
 
   .top{padding:12px 15px 13px}
   .top .row{gap:12px}
@@ -212,8 +214,8 @@ button,.stratchip,.toggle,.clr,.btn2,.stratmk,.leaflet-control-zoom a{touch-acti
   .leg.on{display:block}
 
   /* gaveta vira folha inferior fixa na viewport (funciona mesmo com a página rolada) */
-  .scrim{position:fixed}
-  .drawer{position:fixed;left:0;right:0;top:auto;bottom:0;width:100%;max-width:100%;height:88vh;max-height:88vh;
+  .scrim{position:fixed;inset:0}
+  .drawer{position:fixed;left:0;right:0;bottom:0;top:10vh;top:10dvh;width:100%;max-width:100%;height:auto;max-height:none;
     transform:translateY(103%);border-left:none;border-radius:20px 20px 0 0;padding-bottom:env(safe-area-inset-bottom)}
   .drawer.on{transform:translateY(0)}
 }
@@ -260,11 +262,11 @@ button,.stratchip,.toggle,.clr,.btn2,.stratmk,.leaflet-control-zoom a{touch-acti
   <div class="row">
     <div class="brand">
       <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Símbolo COMPESA" class="logomark">
-<path fill="#8DC63F" d="M 50 2 C 23.533 2 2 23.533 2 50 L 14.49 50 C 14.49 30.39 30.39 14.491 50 14.491 C 69.61 14.491 85.51 30.39 85.51 50 L 98 50 C 98 23.533 76.467 2 50 2"></path>
-<path fill="#fff" d="M 85.503 50 C 85.503 69.61 69.61 85.51 50 85.51 C 30.39 85.51 14.49 69.61 14.49 50 L 2 50 C 2 76.468 23.533 98 50 98 C 76.467 98 98 76.468 98 50 Z"></path>
-<path fill="#fff" d="M 2 49.834 C 2 46.38 4.794 43.586 8.242 43.586 C 11.69 43.586 14.49 46.38 14.49 49.834 C 14.49 53.282 11.69 56.076 8.242 56.076 C 4.794 56.076 2 53.282 2 49.834"></path>
-<path fill="#8DC63F" d="M 85.503 49.834 C 85.503 46.38 88.304 43.586 91.751 43.586 C 95.199 43.586 98 46.38 98 49.834 C 98 53.282 95.199 56.076 91.751 56.076 C 88.304 56.076 85.503 53.282 85.503 49.834"></path>
-<path fill="#fff" d="M 50 2 C 49.987 2.014 28.153 28.808 28.153 50 C 28.153 62.061 37.933 71.847 50 71.847 C 62.061 71.847 71.84 62.061 71.84 50 C 71.847 28.808 50.013 2.014 50 2"></path>
+<path fill="#8DC63F" d="M 50 2 C 23.533 2 2 23.533 2 50 L 14.49 50 C 14.49 30.39 30.39 14.491 50 14.491 C 69.61 14.491 85.51 30.39 85.51 50 L 98 50 C 98 23.533 76.467 2 50 2"/>
+<path fill="#fff" d="M 85.503 50 C 85.503 69.61 69.61 85.51 50 85.51 C 30.39 85.51 14.49 69.61 14.49 50 L 2 50 C 2 76.468 23.533 98 50 98 C 76.467 98 98 76.468 98 50 Z"/>
+<path fill="#fff" d="M 2 49.834 C 2 46.38 4.794 43.586 8.242 43.586 C 11.69 43.586 14.49 46.38 14.49 49.834 C 14.49 53.282 11.69 56.076 8.242 56.076 C 4.794 56.076 2 53.282 2 49.834"/>
+<path fill="#8DC63F" d="M 85.503 49.834 C 85.503 46.38 88.304 43.586 91.751 43.586 C 95.199 43.586 98 46.38 98 49.834 C 98 53.282 95.199 56.076 91.751 56.076 C 88.304 56.076 85.503 53.282 85.503 49.834"/>
+<path fill="#fff" d="M 50 2 C 49.987 2.014 28.153 28.808 28.153 50 C 28.153 62.061 37.933 71.847 50 71.847 C 62.061 71.847 71.84 62.061 71.84 50 C 71.847 28.808 50.013 2.014 50 2"/>
 </svg>
       <span class="divider"></span>
       <div>
@@ -283,17 +285,8 @@ button,.stratchip,.toggle,.clr,.btn2,.stratmk,.leaflet-control-zoom a{touch-acti
 
 
 <div class="controls">
-  <div class="ctl"><input class="inp" id="fSearch" type="text" placeholder="Buscar município…" oninput="searchMun()">
+  <div class="ctl"><input class="inp" id="fSearch" type="text" placeholder="Buscar município…" oninput="searchMun()"/>
     <button class="clr" id="clrBtn" onclick="clearSearch()">Limpar</button></div>
-  <div class="ctl"><label for="fMunClear">Limpar dados de:</label>
-    <select class="sel" id="fMunClear"><option value="">Selecione um município…</option></select>
-    <button class="btn2 danger" onclick="resetMunData()" title="Apagar apenas o contato e as demandas deste município">Limpar município</button>
-  </div>
-  <div class="impexp">
-    <button class="btn2" id="pdfBtn" onclick="exportarRelatorioPDF(this)" title="Gera um relatório com o status de todos os municípios, pronto para salvar em PDF">🖨 Exportar relatório PDF</button>
-    <button class="btn2" onclick="generateSharableCopy(this)" title="Baixa uma cópia deste painel já com os dados atuais, pronta para encaminhar">⬇ Gerar arquivo para enviar</button>
-    <button class="btn2 danger" onclick="resetData()" title="Apagar todos os dados salvos neste navegador">Limpar todos os dados</button>
-  </div>
 </div>
 
 <div class="stratbar" id="stratbar" style="display:none">
@@ -319,7 +312,7 @@ button,.stratchip,.toggle,.clr,.btn2,.stratmk,.leaflet-control-zoom a{touch-acti
     <div class="scrim" id="scrim" onclick="closeDrawer()"></div>
     <aside class="drawer" id="drawer">
       <div class="dhead">
-        <button class="dclose" onclick="closeDrawer()">×</button>
+        <button class="dclose" onclick="closeDrawer()">&times;</button>
         <div class="kicker">Município</div>
         <div class="mun" id="dMun"></div>
         <div class="meta" id="dMeta"></div>
@@ -334,6 +327,21 @@ button,.stratchip,.toggle,.clr,.btn2,.stratmk,.leaflet-control-zoom a{touch-acti
   </div>
 </div>
 
+<div class="admintools">
+  <div class="atlabel">Ferramentas administrativas</div>
+  <div class="atrow">
+    <div class="ctl"><label for="fMunClear">Limpar dados de:</label>
+      <select class="sel" id="fMunClear"><option value="">Selecione um município…</option></select>
+      <button class="btn2 danger" onclick="resetMunData()" title="Apagar apenas o contato e as demandas deste município">Limpar município</button>
+    </div>
+  </div>
+  <div class="impexp">
+    <button class="btn2" id="pdfBtn" onclick="exportarRelatorioPDF(this)" title="Gera um relatório com o status de todos os municípios, pronto para salvar em PDF">🖨 Exportar relatório PDF</button>
+    <button class="btn2" onclick="generateSharableCopy(this)" title="Baixa uma cópia deste painel já com os dados atuais, pronta para encaminhar">⬇ Gerar arquivo para enviar</button>
+    <button class="btn2 danger" onclick="resetData()" title="Apagar todos os dados salvos neste navegador">Limpar todos os dados</button>
+  </div>
+</div>
+
 <div id="printReport"></div>
 
 <script>
@@ -342,6 +350,15 @@ function tick(){var d=new Date();
   document.getElementById('clock').textContent=d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
   document.getElementById('date').textContent=d.toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});}
 tick();setInterval(tick,20000);
+
+// trava a rolagem de fundo com segurança no Safari iOS (overflow:hidden sozinho não é suficiente lá)
+var _scrollY=0;
+function lockBodyScroll(){_scrollY=window.scrollY||document.documentElement.scrollTop||0;
+  document.body.style.position='fixed';document.body.style.top=(-_scrollY)+'px';
+  document.body.style.left='0';document.body.style.right='0';document.body.classList.add('drawer-open');}
+function unlockBodyScroll(){document.body.style.position='';document.body.style.top='';
+  document.body.style.left='';document.body.style.right='';document.body.classList.remove('drawer-open');
+  window.scrollTo(0,_scrollY);}
 
 // mantém o mapa com o tamanho correto ao girar a tela / redimensionar
 window.addEventListener('resize',function(){if(window.MAP&&MAP.invalidateSize)MAP.invalidateSize();});
@@ -357,7 +374,7 @@ var CANAIS=["Ofício","Reunião presencial","Videoconferência","Telefone","E-ma
  "Associação de moradores","Outro"];
 var STL={recv:"Na fila",prog:"Em andamento",done:"Atendida"};
 var STORAGE_KEY='compesa_demandas_state_v1';
-var EMBEDDED_STATE = /*STATE_START*/{"Abreu e Lima":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Afogados da Ingazeira":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Afrânio":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Agrestina":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Água Preta":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Águas Belas":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Alagoinha":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Aliança":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Altinho":{"contato":{"status":"sim","data":"","canal":"","responsavel":"","obs":""},"demandas":[{"id":1784583764326,"tipo":"Reparo na rede de distribuição","desc":"Solicitado reparo","status":"prog","data":"2026-07-20"}]},"Amaraji":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Angelim":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Araçoiaba":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Araripina":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Arcoverde":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Barra de Guabiraba":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Barreiros":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Belém de Maria":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Belém do São Francisco":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Belo Jardim":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Betânia":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Bezerros":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Bodocó":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Bom Conselho":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Bom Jardim":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Bonito":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Brejão":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Brejinho":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Brejo da Madre de Deus":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Buenos Aires":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Buíque":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Cabo de Santo Agostinho":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Cabrobó":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Cachoeirinha":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Caetés":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Calçado":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Calumbi":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Camaragibe":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Camocim de São Félix":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Camutanga":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Canhotinho":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Capoeiras":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Carnaíba":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Carnaubeira da Penha":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Carpina":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Caruaru":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Casinhas":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Catende":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Cedro":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Chã de Alegria":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Chã Grande":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Condado":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Correntes":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Cortês":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Cumaru":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Cupira":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Custódia":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Dormentes":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Escada":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Exu":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Feira Nova":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Fernando de Noronha":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Ferreiros":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Flores":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Floresta":{"contato":{"status":"sim","data":"2026-07-20","canal":"Telefone","responsavel":"EDUARDO","obs":"Falei com o prefeito"},"demandas":[{"id":1784584483233,"tipo":"Regularização de ligações","desc":"xxxxxxxxx","status":"done","data":"2026-07-20"}]},"Frei Miguelinho":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Gameleira":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Garanhuns":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Glória do Goitá":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Goiana":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Granito":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Gravatá":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Iati":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Ibimirim":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Ibirajuba":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Igarassu":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Iguaracy":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Inajá":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Ingazeira":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Ipojuca":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Ipubi":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Itacuruba":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Itaíba":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Ilha de Itamaracá":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Itambé":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Itapetim":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Itapissuma":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Itaquitinga":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Jaboatão dos Guararapes":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Jaqueira":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Jataúba":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Jatobá":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"João Alfredo":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Joaquim Nabuco":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Jucati":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Jupi":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Jurema":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Lagoa do Carro":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Lagoa de Itaenga":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Lagoa do Ouro":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Lagoa dos Gatos":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Lagoa Grande":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Lajedo":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Limoeiro":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Macaparana":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Machados":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Manari":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Maraial":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Mirandiba":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Moreno":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Nazaré da Mata":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Olinda":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Orobó":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Orocó":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Ouricuri":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Palmares":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Palmeirina":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Panelas":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Paranatama":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Parnamirim":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Passira":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Paudalho":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Paulista":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Pedra":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Pesqueira":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Petrolândia":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Petrolina":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Poção":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Pombos":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Primavera":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Quipapá":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Quixaba":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Recife":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Riacho das Almas":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Ribeirão":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Rio Formoso":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Sairé":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Salgadinho":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Salgueiro":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Saloá":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Sanharó":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Santa Cruz":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Santa Cruz da Baixa Verde":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Santa Cruz do Capibaribe":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Santa Filomena":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Santa Maria da Boa Vista":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Santa Maria do Cambucá":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Santa Terezinha":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"São Benedito do Sul":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"São Bento do Una":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"São Caitano":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"São João":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"São Joaquim do Monte":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"São José da Coroa Grande":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"São José do Belmonte":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"São José do Egito":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"São Lourenço da Mata":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"São Vicente Férrer":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Serra Talhada":{"contato":{"status":"sim","data":"2026-07-20","canal":"Telefone","responsavel":"Eduardo","obs":"Falei com a prefeita"},"demandas":[{"id":1784583730619,"tipo":"Nova ligação de esgoto","desc":"Solicitação de nova ligação","status":"recv","data":"2026-07-20"}]},"Serrita":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Sertânia":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Sirinhaém":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Moreilândia":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Solidão":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Surubim":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Tabira":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Tacaimbó":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Tacaratu":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Tamandaré":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Taquaritinga do Norte":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Terezinha":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Terra Nova":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Timbaúba":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Toritama":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Tracunhaém":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Trindade":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Triunfo":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Tupanatinga":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Tuparetama":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Venturosa":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Verdejante":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Vertente do Lério":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Vertentes":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Vicência":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Vitória de Santo Antão":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]},"Xexéu":{"contato":{"status":"nao","data":"","canal":"","responsavel":"","obs":""},"demandas":[]}}/*STATE_END*/;
+var EMBEDDED_STATE = /*STATE_START*/null/*STATE_END*/;
 
 var STATE={}, MAP, GEO, SEL=null, CURRENT=null;
 var STRAT=["olinda","paulista","jaboatao","igarassu","caruaru","petrolina","salgueiro","arcoverde"];
@@ -484,7 +501,7 @@ function openDrawer(nome){CURRENT=nome;ensureMun(nome);
   refreshMeta();
   renderDrawerBody();
   document.getElementById('drawer').classList.add('on');document.getElementById('scrim').classList.add('on');
-  document.body.classList.add('drawer-open');}
+  lockBodyScroll();}
 function refreshMeta(){var st=STATE[CURRENT],sim=st.contato.status==='sim';
   document.getElementById('dMeta').innerHTML='<span class="badgecon '+(sim?'sim':'nao')+'">'+(sim?'✓ Contactado':'○ Não contactado')+'</span>'+(isStrat(CURRENT)?' <span style="color:var(--verde);font-weight:800;margin-left:4px">★ estratégico</span>':'');}
 function renderDrawerBody(){var st=STATE[CURRENT];
@@ -556,7 +573,7 @@ function renderList(){var st=STATE[CURRENT];var el=document.getElementById('dLis
     '<div class="cmeta">'+(d.canal?'<span>via <b>'+esc(d.canal)+'</b></span>':'')+(d.data?'<span>🗓 '+fmtDate(d.data)+'</span>':'')+'</div>'+
    '</div>';}).join('');}
 function closeDrawer(){document.getElementById('drawer').classList.remove('on');document.getElementById('scrim').classList.remove('on');
-  document.body.classList.remove('drawer-open');
+  unlockBodyScroll();
   if(SEL){GEO.resetStyle(SEL);SEL=null;}CURRENT=null;}
 
 function refreshSelColor(){if(SEL)SEL.setStyle({fillColor:SELCOR});}
@@ -729,4 +746,6 @@ function resetData(){if(!confirm('Isso apagará todos os dados salvos neste nave
   if(GEO)GEO.eachLayer(function(l){ensureMun(l.feature.properties._nome);});
   refreshAll();
   if(CURRENT){refreshMeta();renderDrawerBody();}}
-</script></body></html>
+</script>
+</body>
+</html>
