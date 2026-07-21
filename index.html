@@ -810,7 +810,7 @@ function exportarRelatorioPDF(btn){
     var pend=((CONTATOS_PENDENTES&&CONTATOS_PENDENTES.municipios)||[]).filter(function(m){return !contactedSet[norm(m)];});
     var pendHTML='';
     if(pend.length){
-      pendHTML='<div class="reppend"><div class="reppendhead">Contatos a realizar <span class="prazo">até '+esc(CONTATOS_PENDENTES.prazo)+'</span></div>'+
+      pendHTML='<div class="reppend"><div class="reppendhead">Contatos prioritários a realizar <span class="prazo">até '+esc(CONTATOS_PENDENTES.prazo)+'</span></div>'+
         '<div class="reppendlist">'+
           pend.map(function(m){return '<div class="reppenditem"><span class="chk"></span>'+esc(m)+'</div>';}).join('')+
         '</div></div>';
