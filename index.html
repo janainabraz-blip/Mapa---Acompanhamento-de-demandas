@@ -68,6 +68,16 @@ button,.stratchip,.toggle,.clr,.btn2,.stratmk,.leaflet-control-zoom a{touch-acti
 .sel,.inp{font-family:inherit;font-size:12.5px;font-weight:600;padding:8px 12px;border-radius:10px;
   border:1px solid var(--hair);background:var(--surface);color:var(--ink);outline:none}
 .inp{min-width:200px}
+.searchwrap{position:relative}
+.searchdrop{display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:900;
+  background:var(--surface);border:1px solid var(--hair);border-radius:12px;
+  box-shadow:0 10px 26px rgba(33,64,154,.16);max-height:340px;overflow-y:auto;padding:6px}
+.searchdrop.on{display:block}
+.sditem{display:block;width:100%;text-align:left;background:transparent;border:none;
+  padding:9px 12px;border-radius:8px;font-size:13px;font-weight:600;color:var(--ink);
+  cursor:pointer;font-family:inherit}
+.sditem:hover,.sditem:focus{background:var(--azul-l);color:var(--azul);outline:none}
+.sdempty{padding:10px 12px;font-size:12px;color:var(--ink3);font-style:italic}
 .inp::placeholder{color:var(--ink3);font-weight:400}
 .sel:focus,.inp:focus{border-color:var(--azul)}
 .toggle{display:inline-flex;align-items:center;gap:8px;font-size:11.5px;color:var(--ink2);cursor:pointer;user-select:none;
@@ -285,8 +295,12 @@ button,.stratchip,.toggle,.clr,.btn2,.stratmk,.leaflet-control-zoom a{touch-acti
 
 
 <div class="controls">
-  <div class="ctl"><input class="inp" id="fSearch" type="text" placeholder="Buscar município…" oninput="searchMun()"/>
-    <button class="clr" id="clrBtn" onclick="clearSearch()">✕ Limpar busca</button></div>
+  <div class="ctl searchwrap" id="searchWrap">
+    <input class="inp" id="fSearch" type="text" placeholder="Buscar município…" autocomplete="off"
+      oninput="onSearchInput()" onfocus="onSearchFocus()" onkeydown="onSearchKeydown(event)"/>
+    <button class="clr" id="clrBtn" onclick="clearSearch()">✕ Limpar busca</button>
+    <div class="searchdrop" id="searchDrop"></div>
+  </div>
 </div>
 
 <div class="stratbar" id="stratbar" style="display:none">
@@ -378,7 +392,7 @@ var EMBEDDED_STATE = /*STATE_START*/null/*STATE_END*/;
 
 var STATE={}, MAP, GEO, SEL=null, CURRENT=null;
 var STRAT=["olinda","paulista","jaboatao","igarassu","caruaru","petrolina","salgueiro","arcoverde"];
-var stratLayer=null, LAYByName={}, STRAT_FOUND=[], MAINLAND=null;
+var stratLayer=null, LAYByName={}, STRAT_FOUND=[], MAINLAND=null, ALL_MUNS=[];
 function norm(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();}
 function isStrat(nome){var n=norm(nome);return STRAT.some(function(s){return n===s||n.indexOf(s+' ')===0;});}
 function borderFor(f){return f.properties._strat?{color:'#15244E',weight:1.8}:{color:'#fff',weight:.7};}
@@ -440,6 +454,7 @@ function populateMunClearSelect(feats){
   var nomes=feats.map(function(f){return f.properties._nome;});
   nomes=nomes.filter(function(n,i){return nomes.indexOf(n)===i;});
   nomes.sort(function(a,b){return norm(a).localeCompare(norm(b));});
+  ALL_MUNS=nomes;
   var sel=document.getElementById('fMunClear');
   sel.innerHTML='<option value="">Selecione um município…</option>'+
     nomes.map(function(n){return '<option value="'+esc(n)+'">'+esc(n)+'</option>';}).join('');
@@ -574,7 +589,8 @@ function renderList(){var st=STATE[CURRENT];var el=document.getElementById('dLis
    '</div>';}).join('');}
 function closeDrawer(){document.getElementById('drawer').classList.remove('on');document.getElementById('scrim').classList.remove('on');
   unlockBodyScroll();
-  if(SEL){GEO.resetStyle(SEL);SEL=null;}CURRENT=null;}
+  if(SEL){GEO.resetStyle(SEL);SEL=null;}CURRENT=null;
+  if(MAINLAND&&MAINLAND.isValid())MAP.fitBounds(MAINLAND,{padding:[14,14]});}
 
 function refreshSelColor(){if(SEL)SEL.setStyle({fillColor:SELCOR});}
 function refreshAll(){renderKPIs();resetColors();refreshSelColor();}
@@ -586,7 +602,36 @@ function searchMun(){var q=document.getElementById('fSearch').value.toLowerCase(
     if(match&&!fl)fl=l;if(l===SEL)return;
     var b=borderFor(l.feature);l.setStyle(match?{fillOpacity:.85,weight:q?1.8:b.weight,color:q?'#15244E':b.color,fillColor:colorFor(l.feature.properties._nome)}:{fillOpacity:.15,weight:.4,color:'#ccc'});});
   if(q&&fl)MAP.fitBounds(fl.getBounds(),{padding:[60,60],maxZoom:11});}
-function clearSearch(){document.getElementById('fSearch').value='';document.getElementById('clrBtn').style.display='none';resetColors();refreshSelColor();if(MAINLAND)MAP.fitBounds(MAINLAND,{padding:[14,14]});}
+function clearSearch(){document.getElementById('fSearch').value='';document.getElementById('clrBtn').style.display='none';
+  resetColors();refreshSelColor();closeSearchDropdown();if(MAINLAND)MAP.fitBounds(MAINLAND,{padding:[14,14]});}
+
+/* ---------- Lista suspensa de busca ---------- */
+function renderSearchDropdown(q){
+  var el=document.getElementById('searchDrop');if(!el)return;
+  var nq=norm(q||'');
+  var matches=ALL_MUNS.filter(function(n){return !nq||norm(n).indexOf(nq)>=0;});
+  if(!matches.length){el.innerHTML='<div class="sdempty">Nenhum município encontrado</div>';el.classList.add('on');return;}
+  el.innerHTML=matches.map(function(n){return '<button type="button" class="sditem" data-nome="'+esc(n)+'">'+esc(n)+'</button>';}).join('');
+  el.classList.add('on');
+}
+function closeSearchDropdown(){var d=document.getElementById('searchDrop');if(d)d.classList.remove('on');}
+function onSearchInput(){searchMun();renderSearchDropdown(document.getElementById('fSearch').value);}
+function onSearchFocus(){renderSearchDropdown(document.getElementById('fSearch').value);}
+function onSearchKeydown(e){if(e.key==='Enter'){var first=document.querySelector('#searchDrop .sditem');
+  if(first){chooseSearchResult(first.getAttribute('data-nome'));e.preventDefault();}}
+  else if(e.key==='Escape'){closeSearchDropdown();}}
+function chooseSearchResult(nome){
+  document.getElementById('fSearch').value=nome;
+  document.getElementById('clrBtn').style.display='inline-block';
+  closeSearchDropdown();resetColors();focusMun(nome);
+}
+document.getElementById('searchDrop') && document.getElementById('searchDrop').addEventListener('click',function(e){
+  var b=e.target.closest('.sditem');if(b)chooseSearchResult(b.getAttribute('data-nome'));
+});
+document.addEventListener('click',function(e){
+  var wrap=document.getElementById('searchWrap');
+  if(wrap&&!wrap.contains(e.target))closeSearchDropdown();
+});
 
 /* ---------- Gerar cópia com os dados para compartilhar ---------- */
 function generateSharableCopy(btn){
