@@ -234,6 +234,13 @@ button,.stratchip,.toggle,.clr,.btn2,.stratmk,.leaflet-control-zoom a{touch-acti
   #printReport .repitem .stat{font-size:9.5px;color:#5A6785;margin:1px 0 3px;font-weight:700}
   #printReport .repitem .obs{font-size:10px;color:#15244E;line-height:1.4}
   #printReport .repitem .obs .empty{color:#8792AB}
+  #printReport .reppend{clear:both;margin-top:20px;page-break-inside:avoid}
+  #printReport .reppendhead{font-size:12px;font-weight:900;color:#182F73;border-bottom:2px solid #21409A;padding-bottom:5px;margin-bottom:10px}
+  #printReport .reppendhead .prazo{color:#15244E;font-weight:900;padding:0 5px;box-decoration-break:clone;-webkit-box-decoration-break:clone;
+    background:linear-gradient(transparent 14%, #FFE86B 14%, #FFE86B 88%, transparent 88%);-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #printReport .reppendlist{display:flex;flex-wrap:wrap;gap:5px 18px}
+  #printReport .reppenditem{display:flex;align-items:center;gap:8px;width:calc(50% - 9px);font-size:11px;font-weight:700;color:#15244E;padding:3px 0}
+  #printReport .reppenditem .chk{width:11px;height:11px;border:1.5px solid #21409A;border-radius:2px;flex-shrink:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   #printReport .repfoot{clear:both;margin-top:16px;font-size:9px;color:#8792AB;text-align:center}
 }
 #map.capturing .leaflet-control-zoom,#map.capturing .leaflet-control-attribution{display:none!important}
@@ -366,6 +373,7 @@ var EMBEDDED_STATE = /*STATE_START*/{"Arcoverde": {"contato": {"status": "sim", 
 var STATE={}, MAP, GEO, SEL=null, CURRENT=null;
 var STRAT=["olinda","paulista","jaboatao","igarassu","caruaru","petrolina","salgueiro","arcoverde"];
 var RMR=["recife","jaboatao dos guararapes","olinda","paulista","cabo de santo agostinho","camaragibe","sao lourenco da mata","abreu e lima","igarassu","itapissuma","ipojuca","moreno","aracoiaba","ilha de itamaraca"];
+var CONTATOS_PENDENTES={prazo:"24/07/2026", municipios:["Igarassu","Petrolina","Caruaru","Salgueiro","Araçoiaba","Itapissuma","Moreno","Gravatá"]};
 var stratLayer=null, LAYByName={}, STRAT_FOUND=[], MAINLAND=null, ALL_MUNS=[];
 function norm(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();}
 function isStrat(nome){var n=norm(nome);return STRAT.some(function(s){return n===s||n.indexOf(s+' ')===0;});}
@@ -797,6 +805,17 @@ function exportarRelatorioPDF(btn){
       ('<div class="repmap"><img src="'+imgDataUrl+'" alt="Mapa dos municípios"/></div>'):
       ('<div class="repmap" style="font-size:10.5px;color:#C0392B">Não foi possível gerar a imagem do mapa neste navegador.<br><b>Detalhe do erro:</b> '+esc(mapaCapt.err||'desconhecido')+'</div>');
 
+    var contactedSet={};
+    nomes.forEach(function(n){if(STATE[n]&&STATE[n].contato&&STATE[n].contato.status==='sim')contactedSet[norm(n)]=1;});
+    var pend=((CONTATOS_PENDENTES&&CONTATOS_PENDENTES.municipios)||[]).filter(function(m){return !contactedSet[norm(m)];});
+    var pendHTML='';
+    if(pend.length){
+      pendHTML='<div class="reppend"><div class="reppendhead">Contatos a realizar <span class="prazo">até '+esc(CONTATOS_PENDENTES.prazo)+'</span></div>'+
+        '<div class="reppendlist">'+
+          pend.map(function(m){return '<div class="reppenditem"><span class="chk"></span>'+esc(m)+'</div>';}).join('')+
+        '</div></div>';
+    }
+
     var html='<div class="rephead"><div><h1>COMPESA · Relatório de Consulta aos Municípios</h1>'+
       '<div class="sub">Situação de contato e demandas apresentadas por município</div></div>'+
       '<div class="repupdate"><span class="lbl">Atualização</span><span class="val">'+dataStr+' · '+horaStr+'</span></div></div>'+
@@ -804,6 +823,7 @@ function exportarRelatorioPDF(btn){
         mapaHTML+
         linhas.join('')+
       '</div>'+
+      pendHTML+
       '<div class="repfoot">Relatório gerado automaticamente a partir dos dados registrados no painel de acompanhamento.</div>';
 
     document.getElementById('printReport').innerHTML=html;
