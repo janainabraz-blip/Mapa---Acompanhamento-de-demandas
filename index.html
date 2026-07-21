@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="format-detection" content="telephone=no,date=no">
+<title>Consulta aos Municípios · COMPESA</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --azul-d:#182F73; --azul:#21409A; --azul-md:#2E52B8; --azul-l:#EDF0F8;
+  --verde:#8DC63F; --verde-d:#5EA023;
+  --bg:#EEF1F8; --surface:#FFFFFF; --ink:#15244E; --ink2:#5A6785; --ink3:#8792AB;
+  --hair:#DDE3F0; --hair2:#E9EDF6;
+  --atend:#1E9B6E; --andam:#D9820B; --receb:#C0392B;
+}
+html,body{height:100%;overflow:hidden;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+@supports (height:100dvh){html,body{height:100dvh}}
+body{
+  font-family:"Nunito Sans","Segoe UI",system-ui,sans-serif;
+  color:var(--ink); line-height:1.45; -webkit-font-smoothing:antialiased;
+  background:
+    radial-gradient(900px 440px at 88% -6%, rgba(141,198,63,.10), transparent 60%),
+    radial-gradient(760px 420px at 4% 104%, rgba(33,64,154,.07), transparent 55%),
+    var(--bg);
+  display:flex; flex-direction:column;
+  position:fixed; inset:0;
+}
+/* ---------- Ajustes específicos para Safari/iOS ---------- */
+@supports (-webkit-touch-callout:none){
+  .inp,.sel,.contxt,.consel,.contxtarea,.cststatus{font-size:16px!important} /* evita zoom automático ao focar campos */
+}
+button,.stratchip,.toggle,.clr,.btn2,.stratmk,.leaflet-control-zoom a{touch-action:manipulation}
+.top{padding-top:calc(15px + env(safe-area-inset-top))}
+/* ---------- Cabeçalho ---------- */
+.top{position:relative;flex-shrink:0;color:#fff;padding:15px 28px 16px;overflow:hidden;
+  background:linear-gradient(118deg,var(--azul-d) 0%,var(--azul) 58%,var(--azul-md) 100%)}
+.top::before{content:"";position:absolute;right:-50px;top:-90px;width:270px;height:270px;border-radius:50%;border:38px solid rgba(141,198,63,.16)}
+.top::after{content:"";position:absolute;right:120px;top:-130px;width:330px;height:330px;border-radius:50%;border:22px solid rgba(255,255,255,.06)}
+.top .row{display:flex;align-items:center;justify-content:space-between;gap:18px;position:relative;z-index:2}
+.brand{display:flex;align-items:center;gap:15px;min-width:0}
+.logomark{height:52px;width:auto;filter:drop-shadow(0 2px 7px rgba(0,0,0,.22));flex-shrink:0}
+.brand .divider{width:1px;height:46px;background:rgba(255,255,255,.24);flex-shrink:0}
+.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--verde);font-weight:800}
+.title{font-weight:900;font-size:23px;line-height:1.08;letter-spacing:-.01em;margin-top:2px}
+.subtitle{font-size:12px;color:rgba(255,255,255,.68);margin-top:4px;font-weight:400}
+.stamp{text-align:right;flex-shrink:0}
+.stamp .live{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.7);font-weight:700}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--verde);box-shadow:0 0 0 0 rgba(141,198,63,.6);animation:pulse 2.4s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(141,198,63,.55)}70%{box-shadow:0 0 0 8px rgba(141,198,63,0)}100%{box-shadow:0 0 0 0 rgba(141,198,63,0)}}
+.stamp .clock{font-size:19px;font-weight:800;margin-top:3px}
+.stamp .date{font-size:10.5px;color:rgba(255,255,255,.55);margin-top:1px}
+/* ---------- Controles ---------- */
+.controls{display:flex;align-items:center;gap:12px;padding:0 28px 15px;flex-wrap:wrap;flex-shrink:0}
+.ctl{display:flex;align-items:center;gap:7px}
+.ctl label{font-size:11.5px;color:var(--ink2);font-weight:800}
+.sel,.inp{font-family:inherit;font-size:12.5px;font-weight:600;padding:8px 12px;border-radius:10px;
+  border:1px solid var(--hair);background:var(--surface);color:var(--ink);outline:none}
+.inp{min-width:200px}
+.inp::placeholder{color:var(--ink3);font-weight:400}
+.sel:focus,.inp:focus{border-color:var(--azul)}
+.toggle{display:inline-flex;align-items:center;gap:8px;font-size:11.5px;color:var(--ink2);cursor:pointer;user-select:none;
+  background:var(--surface);border:1px solid var(--hair);padding:7px 12px;border-radius:10px;font-weight:700}
+.toggle input{display:none}
+.switch{width:32px;height:18px;border-radius:10px;background:#CDD5E6;position:relative;transition:background .2s;flex-shrink:0}
+.switch::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.toggle input:checked + .switch{background:var(--verde-d)}
+.toggle input:checked + .switch::after{transform:translateX(14px)}
+.clr{font-size:11.5px;font-weight:700;color:var(--azul);cursor:pointer;padding:7px 11px;border:1px solid var(--azul);border-radius:10px;background:transparent;display:none}
+/* ---------- Palco do mapa ---------- */
+.stage{flex:1;min-height:0;padding:0 28px 24px;display:flex}
+.mapcard{flex:1;position:relative;border-radius:20px;overflow:hidden;background:var(--surface);
+  box-shadow:0 18px 44px rgba(33,64,154,.13);border:1px solid var(--hair)}
+#map{width:100%;height:100%;background:#E6EDF5}
+.hud{position:absolute;top:14px;left:14px;z-index:600;background:rgba(255,255,255,.92);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  border:1px solid var(--hair);border-radius:11px;padding:8px 13px;font-size:11.5px;color:var(--ink2);font-weight:700;box-shadow:0 3px 10px rgba(33,64,154,.1)}
+.leg{position:absolute;bottom:14px;left:14px;z-index:600;background:rgba(255,255,255,.94);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  border:1px solid var(--hair);border-radius:14px;padding:11px 15px;max-width:230px;box-shadow:0 4px 14px rgba(33,64,154,.12)}
+.leg .lt{font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px;font-weight:800}
+.leg .li{display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:11.5px;color:var(--ink2);font-weight:600}
+.leg .li:last-child{margin-bottom:0}
+.leg .sw{width:14px;height:14px;border-radius:4px;flex-shrink:0}
+
+/* Barra de municípios estratégicos */
+.stratbar{display:flex;align-items:center;gap:9px;padding:0 28px 15px;flex-wrap:wrap;flex-shrink:0}
+.stratbar .slab{font-size:11px;font-weight:800;color:var(--ink2);text-transform:uppercase;letter-spacing:.03em;display:inline-flex;align-items:center;gap:6px}
+.stratbar .slab .st{color:var(--verde-d)}
+.stratchip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:800;color:var(--azul);
+  background:var(--surface);border:1px solid #C9D3EA;border-radius:20px;padding:6px 13px 6px 10px;cursor:pointer;transition:all .15s}
+.stratchip:hover{background:var(--azul);color:#fff;border-color:var(--azul)}
+.stratchip .pin{width:16px;height:16px;border-radius:50%;background:var(--verde);color:#15244E;display:inline-flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0}
+.stratchip:hover .pin{background:#fff}
+/* Marcador estratégico no mapa */
+.stratmk{background:transparent;border:none}
+.stratmk .wrap{display:flex;align-items:center;gap:5px;transform:translate(-9px,-9px);pointer-events:auto;cursor:pointer}
+.stratmk .pin{width:19px;height:19px;border-radius:50%;background:var(--azul);border:2px solid #fff;color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:10px;box-shadow:0 2px 6px rgba(21,36,78,.45);flex-shrink:0}
+.leaflet-tooltip.mtip{background:var(--azul-d);color:#fff;border:none;border-radius:10px;padding:8px 12px;
+  font-family:inherit;font-size:12px;font-weight:600;box-shadow:0 8px 22px rgba(21,36,78,.35)}
+.leaflet-tooltip.mtip::before{display:none}
+.leaflet-tooltip.mtip b{font-weight:800}
+.leaflet-control-zoom{border:none!important;box-shadow:0 4px 14px rgba(33,64,154,.2)!important;margin:14px!important}
+.leaflet-control-zoom a{background:#fff!important;color:var(--ink)!important;border:1px solid var(--hair)!important;width:32px!important;height:32px!important;line-height:32px!important;font-size:17px!important;font-weight:700}
+.leaflet-control-zoom a:first-child{border-radius:9px 9px 0 0!important}
+.leaflet-control-zoom a:last-child{border-radius:0 0 9px 9px!important}
+.leaflet-control-zoom a:hover{background:var(--azul-l)!important;color:var(--azul)!important}
+.leaflet-control-attribution{font-size:9px!important;background:rgba(255,255,255,.75)!important}
+/* ---------- Gaveta ---------- */
+.scrim{position:absolute;inset:0;z-index:700;background:rgba(21,36,78,.14);opacity:0;pointer-events:none;transition:opacity .25s}
+.scrim.on{opacity:1;pointer-events:auto}
+.drawer{position:absolute;top:0;right:0;bottom:0;width:394px;max-width:92%;z-index:800;background:var(--surface);
+  border-left:1px solid var(--hair);box-shadow:-16px 0 44px rgba(21,36,78,.2);
+  transform:translateX(103%);transition:transform .32s cubic-bezier(.4,1.05,.5,1);display:flex;flex-direction:column;overflow:hidden}
+.drawer.on{transform:translateX(0)}
+.dhead{padding:19px 20px 16px;position:relative;flex-shrink:0;color:#fff;
+  background:linear-gradient(120deg,var(--azul-d),var(--azul) 70%,var(--azul-md))}
+.dhead .kicker{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--verde);font-weight:800}
+.dhead .mun{font-weight:900;font-size:25px;line-height:1.1;margin-top:4px;letter-spacing:-.015em}
+.dhead .meta{font-size:11.5px;color:rgba(255,255,255,.72);margin-top:6px;font-weight:600}
+.dclose{position:absolute;top:15px;right:15px;width:30px;height:30px;border-radius:9px;border:1px solid rgba(255,255,255,.28);
+  background:rgba(255,255,255,.12);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.dclose:hover{background:rgba(255,255,255,.22)}
+.dscroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.dscroll::-webkit-scrollbar{width:7px}.dscroll::-webkit-scrollbar-thumb{background:#CDD5E6;border-radius:4px}
+.dlist{padding:2px 20px 18px}
+.card{border:1px solid var(--hair);border-radius:14px;padding:13px 14px;margin-bottom:11px;background:var(--surface);position:relative;overflow:hidden;box-shadow:0 3px 10px rgba(33,64,154,.05)}
+.card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px}
+.card.done::before{background:var(--atend)}.card.prog::before{background:var(--andam)}.card.recv::before{background:var(--receb)}
+.ctop{display:flex;justify-content:space-between;align-items:flex-start;gap:9px;margin-bottom:6px}
+.ctipo{font-size:14px;font-weight:800;line-height:1.25;color:var(--ink)}
+.cst{font-size:9.5px;font-weight:900;letter-spacing:.02em;padding:3px 9px;border-radius:20px;white-space:nowrap;flex-shrink:0;text-transform:uppercase}
+.cst.done{background:#E6F6EF;color:var(--atend)}.cst.prog{background:#FDF3E4;color:var(--andam)}.cst.recv{background:#FCEEEC;color:var(--receb)}
+.cdesc{font-size:12.5px;color:var(--ink2);line-height:1.5;margin-bottom:9px;font-weight:500}
+.cdesc i{color:var(--azul);font-style:normal;font-weight:700}
+.cmeta{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:10.5px;color:var(--ink3);font-weight:700}
+.cmeta b{color:var(--ink2);font-weight:800}
+.dempty{text-align:center;color:var(--ink3);font-size:12.5px;padding:2.4rem 1rem;font-style:italic}
+.foot{flex-shrink:0;text-align:center;font-size:10px;color:var(--ink3);padding:9px 20px;font-weight:600;border-top:1px solid var(--hair2)}
+/* ---------- Contato e nova demanda ---------- */
+.badgecon{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:800;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.02em}
+.badgecon.sim{background:rgba(141,198,63,.25);color:#eafccb}
+.badgecon.nao{background:rgba(255,255,255,.16);color:rgba(255,255,255,.85)}
+.contbox{border:1px solid var(--hair);border-radius:12px;padding:13px 14px;margin:15px 20px 4px;background:#F7F9FD}
+.conhead{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.conlab{font-size:11px;font-weight:800;color:var(--ink2);text-transform:uppercase;letter-spacing:.03em}
+.toggle.small{padding:5px 10px;font-size:11px;gap:6px}
+.congrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}
+.confield{margin-top:9px}
+.confield label{display:block;font-size:10.5px;font-weight:800;color:var(--ink2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.02em}
+.contxt,.consel,.contxtarea{width:100%;font-family:inherit;font-size:12.5px;font-weight:600;padding:8px 10px;border:1px solid var(--hair);border-radius:8px;background:#fff;color:var(--ink);outline:none}
+.contxtarea{resize:vertical;min-height:52px;font-weight:500}
+.contxt:focus,.consel:focus,.contxtarea:focus{border-color:var(--azul)}
+.consave{margin-top:11px;width:100%;background:var(--azul);color:#fff;border:none;border-radius:9px;padding:9px;font-size:12px;font-weight:800;cursor:pointer}
+.consave:hover{background:var(--azul-d)}
+.consave:disabled{background:var(--verde-d);opacity:1;cursor:default}
+.newdemanda{border:1px dashed #C9D3EA;border-radius:12px;padding:11px 14px;margin:15px 20px 4px}
+.newdemanda summary{font-size:12px;font-weight:800;color:var(--azul);cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px}
+.newdemanda summary::-webkit-details-marker{display:none}
+.newdemanda .body{margin-top:2px}
+.ccontrols{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.cststatus{font-size:9.5px;font-weight:800;padding:4px 6px;border-radius:20px;border:1px solid var(--hair);background:#fff;color:var(--ink2);cursor:pointer;text-transform:uppercase}
+.cdel{width:24px;height:24px;border-radius:7px;border:1px solid var(--hair);background:#fff;cursor:pointer;font-size:11px;flex-shrink:0;color:var(--ink3)}
+.cdel:hover{background:#FCEEEC;border-color:#F3D6D2;color:var(--receb)}
+.impexp{display:flex;gap:8px;flex-wrap:wrap}
+.btn2{font-size:11.5px;font-weight:700;color:var(--azul);cursor:pointer;padding:7px 12px;border:1px solid var(--azul);border-radius:10px;background:transparent}
+.btn2:hover{background:var(--azul);color:#fff}
+.btn2.danger{color:var(--receb);border-color:var(--receb)}
+.btn2.danger:hover{background:var(--receb);color:#fff}
+@media(max-width:840px){
+  .top{padding:12px 15px 13px}.logomark{height:44px}.title{font-size:17px}.stamp .clock{font-size:15px}
+  .controls{padding:0 15px 11px}.inp{min-width:150px}
+  .stage{padding:0 15px 16px}.mapcard{border-radius:16px}
+  .drawer{width:100%;max-width:100%;top:auto;bottom:0;height:74%;transform:translateY(103%);border-left:none;border-radius:20px 20px 0 0;padding-bottom:env(safe-area-inset-bottom)}
+  .drawer.on{transform:translateY(0)}
+}
+@media(prefers-reduced-motion:reduce){.dot{animation:none}}
+
+/* ---------- Relatório para exportação em PDF ---------- */
+#printReport{display:none}
+@media print{
+  @page{margin:14mm}
+  html,body{height:auto!important;overflow:visible!important;position:static!important;background:#fff!important}
+  body>*{display:none!important}
+  #printReport{display:block!important;color:#15244E;font-family:"Nunito Sans","Segoe UI",system-ui,sans-serif}
+  #printReport .rephead{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #21409A;padding-bottom:10px;margin-bottom:16px}
+  #printReport .rephead h1{font-size:19px;font-weight:900;color:#182F73}
+  #printReport .rephead .sub{font-size:11px;color:#5A6785;margin-top:3px}
+  #printReport .repmeta{text-align:right;font-size:10.5px;color:#5A6785}
+  #printReport .repsum{display:flex;gap:10px;margin-bottom:18px}
+  #printReport .repsum .box{flex:1;border:1px solid #DDE3F0;border-radius:8px;padding:8px 10px}
+  #printReport .repsum .box .n{font-size:18px;font-weight:900;color:#21409A}
+  #printReport .repsum .box .l{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:#8792AB;font-weight:800}
+  #printReport table{width:100%;border-collapse:collapse;font-size:10.5px;page-break-inside:auto}
+  #printReport tr{page-break-inside:avoid;page-break-after:auto}
+  #printReport th{text-align:left;background:#EDF0F8;color:#182F73;font-size:9px;text-transform:uppercase;letter-spacing:.03em;padding:6px 7px;border-bottom:2px solid #C9D3EA}
+  #printReport td{padding:6px 7px;border-bottom:1px solid #E9EDF6;vertical-align:top}
+  #printReport .mundemandas{margin:2px 0 0;padding-left:14px}
+  #printReport .mundemandas li{margin-bottom:2px}
+  #printReport .tag{display:inline-block;font-size:8.5px;font-weight:800;text-transform:uppercase;padding:1px 6px;border-radius:8px}
+  #printReport .tag.done{background:#E6F6EF;color:#1E9B6E}
+  #printReport .tag.prog{background:#FDF3E4;color:#D9820B}
+  #printReport .tag.recv{background:#FCEEEC;color:#C0392B}
+  #printReport .repfoot{margin-top:16px;font-size:9px;color:#8792AB;text-align:center}
+  #printReport .repmap{margin:0 0 18px;text-align:center;page-break-inside:avoid}
+  #printReport .repmap img{max-width:56%;max-height:190px;border:1px solid #DDE3F0;border-radius:8px}
+  #printReport .repmaplegend{display:flex;justify-content:center;flex-wrap:wrap;gap:9px 16px;margin-top:8px;font-size:9px;color:#5A6785;font-weight:700}
+  #printReport .repmaplegend span{display:inline-flex;align-items:center;gap:4px}
+  #printReport .repmaplegend i{width:9px;height:9px;border-radius:2px;display:inline-block}
+}
+#map.capturing .leaflet-control-zoom,#map.capturing .leaflet-control-attribution{display:none!important}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="row">
+    <div class="brand">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Símbolo COMPESA" class="logomark">
+<path fill="#8DC63F" d="M 50 2 C 23.533 2 2 23.533 2 50 L 14.49 50 C 14.49 30.39 30.39 14.491 50 14.491 C 69.61 14.491 85.51 30.39 85.51 50 L 98 50 C 98 23.533 76.467 2 50 2"/>
+<path fill="#fff" d="M 85.503 50 C 85.503 69.61 69.61 85.51 50 85.51 C 30.39 85.51 14.49 69.61 14.49 50 L 2 50 C 2 76.468 23.533 98 50 98 C 76.467 98 98 76.468 98 50 Z"/>
+<path fill="#fff" d="M 2 49.834 C 2 46.38 4.794 43.586 8.242 43.586 C 11.69 43.586 14.49 46.38 14.49 49.834 C 14.49 53.282 11.69 56.076 8.242 56.076 C 4.794 56.076 2 53.282 2 49.834"/>
+<path fill="#8DC63F" d="M 85.503 49.834 C 85.503 46.38 88.304 43.586 91.751 43.586 C 95.199 43.586 98 46.38 98 49.834 C 98 53.282 95.199 56.076 91.751 56.076 C 88.304 56.076 85.503 53.282 85.503 49.834"/>
+<path fill="#fff" d="M 50 2 C 49.987 2.014 28.153 28.808 28.153 50 C 28.153 62.061 37.933 71.847 50 71.847 C 62.061 71.847 71.84 62.061 71.84 50 C 71.847 28.808 50.013 2.014 50 2"/>
+</svg>
+      <span class="divider"></span>
+      <div>
+        <div class="eyebrow">COMPESA</div>
+        <div class="title">Consulta aos Municípios</div>
+        <div class="subtitle">Registro de contato, demandas apresentadas e status de atendimento por município</div>
+      </div>
+    </div>
+    <div class="stamp">
+      <div class="live"><span class="dot"></span>Painel de acompanhamento</div>
+      <div class="clock" id="clock">--:--</div>
+      <div class="date" id="date"></div>
+    </div>
+  </div>
+</header>
+
+
+<div class="controls">
+  <div class="ctl"><input class="inp" id="fSearch" type="text" placeholder="Buscar município…" oninput="searchMun()"/>
+    <button class="clr" id="clrBtn" onclick="clearSearch()">Limpar</button></div>
+  <div class="ctl"><label for="fMunClear">Limpar dados de:</label>
+    <select class="sel" id="fMunClear"><option value="">Selecione um município…</option></select>
+    <button class="btn2 danger" onclick="resetMunData()" title="Apagar apenas o contato e as demandas deste município">Limpar município</button>
+  </div>
+  <div class="impexp">
+    <button class="btn2" id="pdfBtn" onclick="exportarRelatorioPDF(this)" title="Gera um relatório com o status de todos os municípios, pronto para salvar em PDF">🖨 Exportar relatório PDF</button>
+    <button class="btn2" onclick="generateSharableCopy(this)" title="Baixa uma cópia deste painel já com os dados atuais, pronta para encaminhar">⬇ Gerar arquivo para enviar</button>
+    <button class="btn2 danger" onclick="resetData()" title="Apagar todos os dados salvos neste navegador">Limpar todos os dados</button>
+  </div>
+</div>
+
+<div class="stratbar" id="stratbar" style="display:none">
+  <span class="slab"><span class="st">★</span>Municípios estratégicos</span>
+</div>
+<div class="stage">
+  <div class="mapcard">
+    <div id="map"></div>
+    <div class="hud" id="hud">Carregando malha de Pernambuco…</div>
+    <div class="leg">
+      <div class="lt">Situação do município</div>
+      <div class="li"><span class="sw" style="background:#C3CCDD"></span>Não contactado</div>
+      <div class="li"><span class="sw" style="background:#6FCF57"></span>Contactado · sem demandas ainda</div>
+      <div class="li" style="margin-top:6px;border-top:1px solid var(--hair);padding-top:6px"><span style="font-size:9.5px;color:var(--ink3);font-weight:800;text-transform:uppercase">demandas atendidas</span></div>
+      <div class="li"><span class="sw" style="background:#1E7A52"></span>≥ 80% concluídas</div>
+      <div class="li"><span class="sw" style="background:#3BA76B"></span>60 – 79%</div>
+      <div class="li"><span class="sw" style="background:#E1A32E"></span>40 – 59%</div>
+      <div class="li"><span class="sw" style="background:#C77A1E"></span>abaixo de 40%</div>
+      <div class="li"><span class="sw" style="background:#8DC63F"></span>município selecionado</div>
+      <div class="li" style="margin-top:6px;border-top:1px solid var(--hair);padding-top:6px"><span style="color:var(--azul);font-size:13px">★</span> município estratégico</div>
+    </div>
+    <div class="scrim" id="scrim" onclick="closeDrawer()"></div>
+    <aside class="drawer" id="drawer">
+      <div class="dhead">
+        <button class="dclose" onclick="closeDrawer()">&times;</button>
+        <div class="kicker">Município</div>
+        <div class="mun" id="dMun"></div>
+        <div class="meta" id="dMeta"></div>
+      </div>
+      <div class="dscroll">
+        <div id="dContato"></div>
+        <div id="dNewDemanda"></div>
+        <div class="dlist" id="dList"></div>
+      </div>
+      <div class="foot">Dados salvos neste navegador · use "Gerar arquivo para enviar" para encaminhar com os dados</div>
+    </aside>
+  </div>
+</div>
+
+<div id="printReport"></div>
+
+<script>
+var ORIGINAL_HTML=document.documentElement.outerHTML; /* cópia intocada da página, capturada antes de qualquer alteração via JS */
+function tick(){var d=new Date();
+  document.getElementById('clock').textContent=d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('date').textContent=d.toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});}
+tick();setInterval(tick,20000);
+
+var TIPOS_SUGESTOES=["Expansão de rede de água","Contenção de vazamento","Nova ligação de esgoto",
+ "Substituição de adutora","Desobstrução de rede coletora","Reparo na rede de distribuição",
+ "Instalação de hidrômetros","Regularização de abastecimento","Recomposição de calçamento",
+ "Reforço de reservação","Manutenção de elevatória","Regularização de ligações","Construção de ETE/ETA",
+ "Ampliação de reservatório","Universalização do saneamento","Outro"];
+var CANAIS=["Ofício","Reunião presencial","Videoconferência","Telefone","E-mail",
+ "Visita técnica","Ouvidoria","Gabinete da Governadora","Vereador / Câmara Municipal",
+ "Associação de moradores","Outro"];
+var STL={recv:"Na fila",prog:"Em andamento",done:"Atendida"};
+var STORAGE_KEY='compesa_demandas_state_v1';
+var EMBEDDED_STATE = /*STATE_START*/null/*STATE_END*/;
+
+var STATE={}, MAP, GEO, SEL=null, CURRENT=null;
+var STRAT=["olinda","paulista","jaboatao","igarassu","caruaru","petrolina","salgueiro","arcoverde"];
+var stratLayer=null, LAYByName={}, STRAT_FOUND=[], MAINLAND=null;
+function norm(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();}
+function isStrat(nome){var n=norm(nome);return STRAT.some(function(s){return n===s||n.indexOf(s+' ')===0;});}
+function borderFor(f){return f.properties._strat?{color:'#15244E',weight:1.8}:{color:'#fff',weight:.7};}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function todayISO(){return new Date().toISOString().slice(0,10);}
+function fmtDate(iso){if(!iso)return'';var p=iso.split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:iso;}
+
+function loadState(){try{var raw=localStorage.getItem(STORAGE_KEY);
+  if(raw){STATE=JSON.parse(raw)||{};}
+  else if(EMBEDDED_STATE&&typeof EMBEDDED_STATE==='object'){STATE=EMBEDDED_STATE;saveState();}
+ }catch(e){console.error('Falha ao carregar dados salvos',e);STATE={};}}
+function saveState(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(STATE));}catch(e){console.error('Falha ao salvar dados',e);}}
+function ensureMun(nome){if(!STATE[nome])STATE[nome]={contato:{status:'nao',data:'',canal:'',responsavel:'',obs:''},demandas:[]};if(!STATE[nome].demandas)STATE[nome].demandas=[];if(!STATE[nome].contato)STATE[nome].contato={status:'nao',data:'',canal:'',responsavel:'',obs:''};return STATE[nome];}
+loadState();
+
+function pct(a){if(!a.length)return null;return Math.round(a.filter(function(x){return x.status==='done'}).length/a.length*100);}
+function colorFor(nome){var st=STATE[nome];if(!st||st.contato.status!=='sim')return '#C3CCDD';
+ var a=st.demandas;if(!a.length)return '#6FCF57';var p=pct(a);
+ return p>=80?'#1E7A52':p>=60?'#3BA76B':p>=40?'#E1A32E':'#C77A1E';}
+function baseStyle(f){var b=borderFor(f);return {fillColor:colorFor(f.properties._nome),fillOpacity:.85,color:b.color,weight:b.weight,opacity:1};}
+
+MAP=L.map('map',{center:[-8.5,-37.9],zoom:7,zoomControl:false,attributionControl:true,preferCanvas:true});
+L.control.zoom({position:'topright'}).addTo(MAP);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png',
+ {attribution:'&copy; OpenStreetMap &copy; CARTO',subdomains:'abcd',maxZoom:19,crossOrigin:true}).addTo(MAP);
+
+var HUD=document.getElementById('hud');HUD.textContent='Carregando municípios de PE…';
+Promise.all([
+  fetch('https://servicodados.ibge.gov.br/api/v1/localidades/estados/26/municipios').then(function(r){return r.json();}),
+  fetch('https://servicodados.ibge.gov.br/api/v3/malhas/estados/26?intrarregiao=municipio&formato=application/vnd.geo+json&qualidade=intermediaria').then(function(r){return r.json();})
+]).then(function(res){var nomeById={};res[0].forEach(function(m){nomeById[String(m.id)]=m.nome;});buildMap(res[1],nomeById);})
+ .catch(function(e){HUD.textContent='Não foi possível carregar os dados do IBGE. Verifique a conexão.';console.error(e);});
+
+function buildMap(geo,nomeById){var feats=geo.features||[];
+  feats.forEach(function(f,i){var code=String((f.properties&&f.properties.codarea)||'').split('.')[0];
+    var nome=nomeById[code]||nomeById[code.slice(0,7)]||('Município '+code);
+    f.properties._nome=nome;f.properties._strat=isStrat(nome);
+    ensureMun(nome);});
+  GEO=L.geoJSON(geo,{style:baseStyle,onEachFeature:function(f,layer){var nome=f.properties._nome;
+    layer.on('mouseover',function(e){var st=STATE[nome],sim=st.contato.status==='sim',a=st.demandas,p=pct(a);
+      var sub= !sim?'Não contactado':(a.length?(a.length+' demanda'+(a.length!==1?'s':'')+(p!==null?' · '+p+'% atendidas':'')):'Contactado · sem demandas ainda');
+      layer.bindTooltip('<b>'+nome+'</b><br><span style="font-size:11px;opacity:.85">'+sub+'</span>',
+       {sticky:true,className:'mtip',offset:[10,0]}).openTooltip(e.latlng);});
+    layer.on('mouseout',function(){layer.closeTooltip();});
+    layer.on('click',function(){selectMun(layer,nome);});
+    LAYByName[nome]=layer;
+  }}).addTo(MAP);
+  // Enquadra o PE continental (exclui Fernando de Noronha, que fica no oceano)
+  MAINLAND=L.latLngBounds([]);
+  GEO.eachLayer(function(l){if(norm(l.feature.properties._nome).indexOf('fernando de noronha')<0)MAINLAND.extend(l.getBounds());});
+  MAP.fitBounds(MAINLAND,{padding:[14,14]});
+  buildStrategic();renderKPIs();populateMunClearSelect(feats);
+  HUD.textContent=feats.length+' municípios · clique para registrar contato e demandas';
+}
+
+function populateMunClearSelect(feats){
+  var nomes=feats.map(function(f){return f.properties._nome;});
+  nomes=nomes.filter(function(n,i){return nomes.indexOf(n)===i;});
+  nomes.sort(function(a,b){return norm(a).localeCompare(norm(b));});
+  var sel=document.getElementById('fMunClear');
+  sel.innerHTML='<option value="">Selecione um município…</option>'+
+    nomes.map(function(n){return '<option value="'+esc(n)+'">'+esc(n)+'</option>';}).join('');
+}
+function resetMunData(){
+  var sel=document.getElementById('fMunClear');var nome=sel.value;
+  if(!nome){alert('Selecione um município para limpar.');return;}
+  if(!confirm('Isso apagará o contato e todas as demandas registradas para '+nome+'. Os demais municípios não serão afetados. Deseja continuar?'))return;
+  STATE[nome]={contato:{status:'nao',data:'',canal:'',responsavel:'',obs:''},demandas:[]};
+  saveState();refreshAll();
+  if(CURRENT===nome){refreshMeta();renderDrawerBody();}
+  sel.value='';
+}
+
+function buildStrategic(){
+  stratLayer=L.layerGroup().addTo(MAP);
+  STRAT_FOUND=[];
+  GEO.eachLayer(function(l){
+    if(!l.feature.properties._strat)return;
+    var nome=l.feature.properties._nome, c=l.getBounds().getCenter();
+    STRAT_FOUND.push(nome);
+    var mk=L.marker(c,{icon:L.divIcon({className:'stratmk',html:'<div class="wrap"><span class="pin">★</span></div>',iconSize:[0,0]}),zIndexOffset:1000,riseOnHover:true});
+    mk.on('mouseover',function(e){var st=STATE[nome],sim=st.contato.status==='sim',aa=st.demandas,pp=pct(aa);
+      var sub= !sim?'Não contactado':(aa.length?(aa.length+' demanda'+(aa.length!==1?'s':'')+(pp!==null?' · '+pp+'% atendidas':'')):'Contactado · sem demandas ainda');
+      mk.bindTooltip('<b>'+nome+'</b> <span style="opacity:.72;font-weight:700">★ estratégico</span><br><span style="font-size:11px;opacity:.85">'+sub+'</span>',{className:'mtip',direction:'top',offset:[0,-11]}).openTooltip(e.latlng);});
+    mk.on('click',function(){focusMun(nome);});
+    stratLayer.addLayer(mk);
+  });
+  // ordena chips conforme a lista informada
+  var order={};STRAT.forEach(function(s,i){order[s]=i;});
+  STRAT_FOUND.sort(function(a,b){var na=norm(a),nb=norm(b);
+    function idx(n){for(var i=0;i<STRAT.length;i++){if(n===STRAT[i]||n.indexOf(STRAT[i]+' ')===0)return i;}return 99;}
+    return idx(na)-idx(nb);});
+  var bar=document.getElementById('stratbar');
+  STRAT_FOUND.forEach(function(nome){
+    var b=document.createElement('button');b.className='stratchip';
+    b.innerHTML='<span class="pin">★</span>'+nome;
+    b.onclick=function(){focusMun(nome);};
+    bar.appendChild(b);
+  });
+  bar.style.display='flex';
+}
+function focusMun(nome){
+  var l=LAYByName[nome];if(!l)return;
+  selectMun(l,nome);
+  MAP.fitBounds(l.getBounds(),{padding:[80,80],maxZoom:11});
+}
+
+function renderKPIs(){/* quadros de KPIs removidos */}
+function canalOptions(sel){return '<option value="">Selecione…</option>'+CANAIS.map(function(c){return '<option value="'+esc(c)+'"'+(c===sel?' selected':'')+'>'+esc(c)+'</option>';}).join('');}
+function statusOptions(sel){return ['recv','prog','done'].map(function(k){return '<option value="'+k+'"'+(k===sel?' selected':'')+'>'+STL[k]+'</option>';}).join('');}
+var SELCOR='#8DC63F';
+function selectMun(layer,nome){if(SEL&&SEL!==layer)GEO.resetStyle(SEL);
+  SEL=layer;layer.setStyle({weight:2.6,color:'#15244E',fillOpacity:.96,fillColor:SELCOR});layer.bringToFront();openDrawer(nome);}
+function openDrawer(nome){CURRENT=nome;ensureMun(nome);
+  document.getElementById('dMun').textContent=nome;
+  refreshMeta();
+  renderDrawerBody();
+  document.getElementById('drawer').classList.add('on');document.getElementById('scrim').classList.add('on');}
+function refreshMeta(){var st=STATE[CURRENT],sim=st.contato.status==='sim';
+  document.getElementById('dMeta').innerHTML='<span class="badgecon '+(sim?'sim':'nao')+'">'+(sim?'✓ Contactado':'○ Não contactado')+'</span>'+(isStrat(CURRENT)?' <span style="color:var(--verde);font-weight:800;margin-left:4px">★ estratégico</span>':'');}
+function renderDrawerBody(){var st=STATE[CURRENT];
+  document.getElementById('dContato').innerHTML=contatoHTML(CURRENT);
+  renderMini();
+  document.getElementById('dNewDemanda').innerHTML= st.contato.status==='sim'?newDemandaHTML():'';
+  renderList();}
+
+function contatoHTML(nome){var st=STATE[nome].contato,sim=st.status==='sim',html='<div class="contbox">';
+  html+='<div class="conhead"><span class="conlab">Situação do contato</span>'+
+    '<label class="toggle small"><input type="checkbox" id="cToggle" '+(sim?'checked':'')+' onchange="toggleContato()"/><span class="switch"></span>'+(sim?'Contactado':'Não contactado')+'</label></div>';
+  if(sim){
+    html+='<div class="congrid">'+
+      '<div class="confield"><label>Data do contato</label><input type="date" class="contxt" id="cData" value="'+esc(st.data)+'"></div>'+
+      '<div class="confield"><label>Canal</label><select class="consel" id="cCanal">'+canalOptions(st.canal)+'</select></div>'+
+     '</div>'+
+     '<div class="confield"><label>Responsável pelo contato</label><input type="text" class="contxt" id="cResp" placeholder="Nome / setor" value="'+esc(st.responsavel)+'"></div>'+
+     '<div class="confield"><label>Observações</label><textarea class="contxtarea" id="cObs" placeholder="Anotações sobre o contato…">'+esc(st.obs)+'</textarea></div>'+
+     '<button class="consave" onclick="saveContato(this)">Salvar informações de contato</button>';
+  }
+  html+='</div>';return html;}
+function toggleContato(){ensureMun(CURRENT);var checked=document.getElementById('cToggle').checked;
+  STATE[CURRENT].contato.status=checked?'sim':'nao';saveState();
+  refreshMeta();renderDrawerBody();refreshAll();}
+function saveContato(btn){if(!CURRENT)return;ensureMun(CURRENT);var c=STATE[CURRENT].contato;
+  c.data=document.getElementById('cData').value;c.canal=document.getElementById('cCanal').value;
+  c.responsavel=document.getElementById('cResp').value;c.obs=document.getElementById('cObs').value;
+  saveState();refreshMeta();refreshAll();
+  if(btn){var orig=btn.textContent;btn.textContent='✓ Salvo';btn.disabled=true;
+    clearTimeout(btn._t);btn._t=setTimeout(function(){btn.textContent=orig;btn.disabled=false;},1400);}}
+
+function renderMini(){/* mini-resumo removido */}
+
+function newDemandaHTML(){return '<details class="newdemanda" id="ndBox"><summary>+ Registrar nova demanda</summary><div class="body">'+
+   '<div class="confield"><label>Tipo de demanda</label><input list="tiposList" class="contxt" id="ndTipo" placeholder="Ex.: Expansão de rede de água"></div>'+
+   '<datalist id="tiposList">'+TIPOS_SUGESTOES.map(function(t){return '<option value="'+esc(t)+'">';}).join('')+'</datalist>'+
+   '<div class="confield"><label>Descrição da demanda</label><textarea class="contxtarea" id="ndDesc" placeholder="Detalhe a solicitação apresentada pelo município…"></textarea></div>'+
+   '<div class="congrid">'+
+     '<div class="confield"><label>Situação</label><select class="consel" id="ndStatus">'+statusOptions('recv')+'</select></div>'+
+     '<div class="confield"><label>Data</label><input type="date" class="contxt" id="ndData" value="'+todayISO()+'"></div>'+
+   '</div>'+
+   '<button class="consave" onclick="addDemanda()">Adicionar demanda</button>'+
+  '</div></details>';}
+function addDemanda(){var tipo=document.getElementById('ndTipo').value.trim();
+  if(!tipo){alert('Informe o tipo da demanda.');return;}
+  ensureMun(CURRENT);
+  STATE[CURRENT].demandas.push({id:Date.now()+Math.floor(Math.random()*1000),tipo:tipo,
+    desc:document.getElementById('ndDesc').value.trim(),status:document.getElementById('ndStatus').value,
+    data:document.getElementById('ndData').value});
+  saveState();
+  document.getElementById('dNewDemanda').innerHTML=newDemandaHTML();
+  renderMini();renderList();refreshAll();}
+function setDemandaStatus(id,status){var it=STATE[CURRENT].demandas.find(function(x){return x.id===id;});
+  if(it){it.status=status;saveState();renderMini();renderList();refreshAll();}}
+function deleteDemanda(id){if(!confirm('Remover esta demanda?'))return;
+  STATE[CURRENT].demandas=STATE[CURRENT].demandas.filter(function(x){return x.id!==id;});
+  saveState();renderMini();renderList();refreshAll();}
+
+function renderList(){var st=STATE[CURRENT];var el=document.getElementById('dList');
+  if(st.contato.status!=='sim'){el.innerHTML='<div class="dempty">Registre o contato com o município para começar a lançar demandas.</div>';return;}
+  var out=st.demandas.slice();
+  var ord={recv:0,prog:1,done:2};out.sort(function(x,y){return ord[x.status]-ord[y.status]||(y.data||'').localeCompare(x.data||'');});
+  if(!out.length){el.innerHTML='<div class="dempty">Nenhuma demanda registrada ainda.</div>';return;}
+  el.innerHTML=out.map(function(d){return '<div class="card '+d.status+'">'+
+    '<div class="ctop"><div class="ctipo">'+esc(d.tipo)+'</div>'+
+     '<div class="ccontrols"><select class="cststatus" onchange="setDemandaStatus('+d.id+',this.value)">'+statusOptions(d.status)+'</select>'+
+     '<button class="cdel" onclick="deleteDemanda('+d.id+')" title="Remover demanda">✕</button></div></div>'+
+    (d.desc?'<div class="cdesc">'+esc(d.desc)+'</div>':'')+
+    '<div class="cmeta">'+(d.canal?'<span>via <b>'+esc(d.canal)+'</b></span>':'')+(d.data?'<span>🗓 '+fmtDate(d.data)+'</span>':'')+'</div>'+
+   '</div>';}).join('');}
+function closeDrawer(){document.getElementById('drawer').classList.remove('on');document.getElementById('scrim').classList.remove('on');
+  if(SEL){GEO.resetStyle(SEL);SEL=null;}CURRENT=null;}
+
+function refreshSelColor(){if(SEL)SEL.setStyle({fillColor:SELCOR});}
+function refreshAll(){renderKPIs();resetColors();refreshSelColor();}
+
+function resetColors(){if(!GEO)return;GEO.eachLayer(function(l){if(l===SEL)return;l.setStyle(baseStyle(l.feature));});}
+function searchMun(){var q=document.getElementById('fSearch').value.toLowerCase().trim();
+  document.getElementById('clrBtn').style.display=q?'inline-block':'none';if(!GEO)return;var fl=null;
+  GEO.eachLayer(function(l){var nome=l.feature.properties._nome.toLowerCase(),match=!q||nome.indexOf(q)>=0;
+    if(match&&!fl)fl=l;if(l===SEL)return;
+    var b=borderFor(l.feature);l.setStyle(match?{fillOpacity:.85,weight:q?1.8:b.weight,color:q?'#15244E':b.color,fillColor:colorFor(l.feature.properties._nome)}:{fillOpacity:.15,weight:.4,color:'#ccc'});});
+  if(q&&fl)MAP.fitBounds(fl.getBounds(),{padding:[60,60],maxZoom:11});}
+function clearSearch(){document.getElementById('fSearch').value='';document.getElementById('clrBtn').style.display='none';resetColors();refreshSelColor();if(MAINLAND)MAP.fitBounds(MAINLAND,{padding:[14,14]});}
+
+/* ---------- Gerar cópia com os dados para compartilhar ---------- */
+function generateSharableCopy(btn){
+  try{
+    var marker=/\/\*STATE_START\*\/[\s\S]*?\/\*STATE_END\*\//;
+    if(!marker.test(ORIGINAL_HTML)){alert('Não foi possível gerar o arquivo: marcador de dados não encontrado.');return;}
+    var out='<!DOCTYPE html>\n'+ORIGINAL_HTML.replace(marker,'/*STATE_START*/'+JSON.stringify(STATE)+'/*STATE_END*/');
+    var blob=new Blob([out],{type:'text/html'});
+    var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;
+    a.download='compesa_consulta_municipios_'+todayISO()+'.html';
+    document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+    if(btn){var orig=btn.textContent;btn.textContent='✓ Baixado';setTimeout(function(){btn.textContent=orig;},1600);}
+  }catch(e){
+    alert('Não foi possível gerar o arquivo automaticamente. Salve este arquivo normalmente (Ctrl/Cmd+S) e envie-o — os dados já ficam salvos nele quando aberto neste navegador.');
+    console.error(e);
+  }
+}
+
+/* ---------- Exportar relatório em PDF ---------- */
+function capturarMapaImg(){
+  var mapEl=document.getElementById('map');
+  if(!mapEl)return Promise.resolve(null);
+  mapEl.classList.add('capturing');
+  return new Promise(function(resolve){
+    // pequena pausa para garantir que os tiles terminaram de renderizar antes da captura
+    setTimeout(function(){
+      try{
+        var scale=2;
+        var mapRect=mapEl.getBoundingClientRect();
+        var canvas=document.createElement('canvas');
+        canvas.width=Math.round(mapRect.width*scale);
+        canvas.height=Math.round(mapRect.height*scale);
+        var ctx=canvas.getContext('2d');
+        ctx.fillStyle='#E6EDF5';
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+
+        // 1) tiles do mapa-base — posicionados pela posição final real na tela (getBoundingClientRect),
+        //    o que evita o deslocamento causado por tentar reinterpretar os transforms do Leaflet
+        mapEl.querySelectorAll('img.leaflet-tile-loaded').forEach(function(img){
+          var r=img.getBoundingClientRect();
+          if(r.right<=mapRect.left||r.left>=mapRect.right||r.bottom<=mapRect.top||r.top>=mapRect.bottom)return;
+          try{ctx.drawImage(img,(r.left-mapRect.left)*scale,(r.top-mapRect.top)*scale,r.width*scale,r.height*scale);}catch(e){}
+        });
+
+        // 2) polígonos dos municípios (renderizados pelo próprio Leaflet num <canvas>)
+        var vecCanvas=mapEl.querySelector('.leaflet-overlay-pane canvas');
+        if(vecCanvas){
+          var vr=vecCanvas.getBoundingClientRect();
+          ctx.drawImage(vecCanvas,(vr.left-mapRect.left)*scale,(vr.top-mapRect.top)*scale,vr.width*scale,vr.height*scale);
+        }
+
+        // 3) marcadores estratégicos (pino azul com estrela)
+        mapEl.querySelectorAll('.stratmk .pin').forEach(function(pin){
+          var pr=pin.getBoundingClientRect();
+          var cx=(pr.left+pr.width/2-mapRect.left)*scale,cy=(pr.top+pr.height/2-mapRect.top)*scale;
+          var raio=(pr.width/2)*scale;
+          ctx.beginPath();ctx.arc(cx,cy,raio,0,2*Math.PI);
+          ctx.fillStyle='#21409A';ctx.fill();
+          ctx.lineWidth=Math.max(1,scale);ctx.strokeStyle='#fff';ctx.stroke();
+          ctx.fillStyle='#fff';ctx.font=(raio*1.15)+'px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+          ctx.fillText('★',cx,cy+raio*0.05);
+        });
+
+        mapEl.classList.remove('capturing');
+        resolve(canvas.toDataURL('image/png'));
+      }catch(e){
+        mapEl.classList.remove('capturing');
+        console.error('Falha ao capturar o mapa:',e);
+        resolve(null);
+      }
+    },350);
+  });
+}
+
+function exportarRelatorioPDF(btn){
+  var nomes=Object.keys(STATE);
+  if(!nomes.length){alert('Ainda não há municípios carregados. Aguarde o mapa carregar e tente novamente.');return;}
+  nomes.sort(function(a,b){return norm(a).localeCompare(norm(b));});
+
+  var contactados=0,totalDemandas=0,concluidas=0;
+  var linhas=nomes.map(function(nome){
+    var st=STATE[nome],sim=st.contato.status==='sim',a=st.demandas||[];
+    if(sim)contactados++;
+    totalDemandas+=a.length;
+    concluidas+=a.filter(function(x){return x.status==='done';}).length;
+    if(!sim&&!a.length)return null; // omite municípios sem nenhuma informação lançada
+
+    var contatoInfo=sim?
+      ('Contactado'+(st.contato.data?' em '+fmtDate(st.contato.data):'')+(st.contato.canal?' · '+esc(st.contato.canal):'')+(st.contato.responsavel?' · '+esc(st.contato.responsavel):'')):
+      'Não contactado';
+
+    var demandasHTML=a.length?('<ul class="mundemandas">'+a.map(function(d){
+        return '<li><span class="tag '+d.status+'">'+STL[d.status]+'</span> '+esc(d.tipo)+(d.data?' — '+fmtDate(d.data):'')+'</li>';
+      }).join('')+'</ul>'):'<span style="color:#8792AB">Nenhuma demanda registrada</span>';
+
+    return '<tr><td><b>'+esc(nome)+'</b>'+(isStrat(nome)?' ★':'')+'</td><td>'+contatoInfo+'</td><td>'+demandasHTML+'</td></tr>';
+  }).filter(Boolean);
+
+  if(!linhas.length){alert('Não há dados de contato ou demandas registrados ainda para incluir no relatório.');return;}
+
+  var origLabel;
+  if(btn){origLabel=btn.textContent;btn.textContent='Gerando…';btn.disabled=true;}
+
+  capturarMapaImg().then(function(imgDataUrl){
+    var agora=new Date();
+    var dataStr=agora.toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+    var horaStr=agora.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    var pctGeral=totalDemandas?Math.round(concluidas/totalDemandas*100):0;
+
+    var mapaHTML=imgDataUrl?
+      ('<div class="repmap"><img src="'+imgDataUrl+'" alt="Mapa dos municípios"/>'+
+        '<div class="repmaplegend">'+
+          '<span><i style="background:#C3CCDD"></i>Não contactado</span>'+
+          '<span><i style="background:#6FCF57"></i>Contactado · sem demandas</span>'+
+          '<span><i style="background:#1E7A52"></i>≥80% atendidas</span>'+
+          '<span><i style="background:#3BA76B"></i>60–79%</span>'+
+          '<span><i style="background:#E1A32E"></i>40–59%</span>'+
+          '<span><i style="background:#C77A1E"></i>&lt;40%</span>'+
+        '</div></div>'):
+      '<div class="repmap" style="font-size:10.5px;color:#C0392B">Não foi possível gerar a imagem do mapa neste navegador (abra o console para detalhes).</div>';
+
+    var html='<div class="rephead"><div><h1>COMPESA · Relatório de Consulta aos Municípios</h1>'+
+      '<div class="sub">Situação de contato e demandas apresentadas por município</div></div>'+
+      '<div class="repmeta">Gerado em '+dataStr+' às '+horaStr+'</div></div>'+
+      '<div class="repsum">'+
+        '<div class="box"><div class="n">'+contactados+'</div><div class="l">Municípios contactados</div></div>'+
+        '<div class="box"><div class="n">'+totalDemandas+'</div><div class="l">Demandas registradas</div></div>'+
+        '<div class="box"><div class="n">'+concluidas+'</div><div class="l">Demandas atendidas</div></div>'+
+        '<div class="box"><div class="n">'+pctGeral+'%</div><div class="l">Percentual atendido</div></div>'+
+      '</div>'+
+      mapaHTML+
+      '<table><thead><tr><th style="width:19%">Município</th><th style="width:26%">Contato</th><th>Demandas</th></tr></thead><tbody>'+
+      linhas.join('')+
+      '</tbody></table>'+
+      '<div class="repfoot">Relatório gerado automaticamente a partir dos dados registrados no painel de acompanhamento.</div>';
+
+    document.getElementById('printReport').innerHTML=html;
+    if(btn){btn.textContent=origLabel;btn.disabled=false;}
+    window.print();
+  });
+}
+
+/* ---------- Limpar dados ---------- */
+function resetData(){if(!confirm('Isso apagará todos os dados salvos neste navegador (contatos e demandas). Deseja continuar?'))return;
+  localStorage.removeItem(STORAGE_KEY);STATE={};
+  if(GEO)GEO.eachLayer(function(l){ensureMun(l.feature.properties._nome);});
+  refreshAll();
+  if(CURRENT){refreshMeta();renderDrawerBody();}}
+</script>
+</body>
+</html>
