@@ -87,6 +87,7 @@ button,.stratchip,.toggle,.clr,.btn2,.stratmk,.leaflet-control-zoom a{touch-acti
 .leg .li{display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:11.5px;color:var(--ink2);font-weight:600}
 .leg .li:last-child{margin-bottom:0}
 .leg .sw{width:14px;height:14px;border-radius:4px;flex-shrink:0}
+.legtoggle{display:none}
 
 /* Barra de municípios estratégicos */
 .stratbar{display:flex;align-items:center;gap:9px;padding:0 28px 15px;flex-wrap:wrap;flex-shrink:0}
@@ -174,10 +175,47 @@ button,.stratchip,.toggle,.clr,.btn2,.stratmk,.leaflet-control-zoom a{touch-acti
 .btn2.danger{color:var(--receb);border-color:var(--receb)}
 .btn2.danger:hover{background:var(--receb);color:#fff}
 @media(max-width:840px){
-  .top{padding:12px 15px 13px}.logomark{height:44px}.title{font-size:17px}.stamp .clock{font-size:15px}
-  .controls{padding:0 15px 11px}.inp{min-width:150px}
-  .stage{padding:0 15px 16px}.mapcard{border-radius:16px}
-  .drawer{width:100%;max-width:100%;top:auto;bottom:0;height:74%;transform:translateY(103%);border-left:none;border-radius:20px 20px 0 0;padding-bottom:env(safe-area-inset-bottom)}
+  /* No celular o modelo "tudo numa tela fixa" espreme o mapa; voltamos ao fluxo
+     normal com rolagem vertical e damos ao mapa uma altura própria e utilizável. */
+  html,body{position:static;height:auto;min-height:100%;overflow:visible;overflow-y:auto;overscroll-behavior:auto}
+  body{display:block}
+  body.drawer-open{overflow:hidden}
+
+  .top{padding:12px 15px 13px}
+  .top .row{gap:12px}
+  .logomark{height:40px}.brand .divider{height:38px}
+  .title{font-size:17px}
+  .subtitle{display:none} /* subtítulo longo ocupava ~6 linhas no celular */
+  .stamp .clock{font-size:15px}
+  .stamp .live{font-size:9px}
+
+  .controls{padding:11px 15px 12px;gap:12px;flex-direction:column;align-items:stretch}
+  .controls .ctl{width:100%;flex-wrap:wrap;gap:8px}
+  .controls .ctl label{flex:1 0 100%;margin-bottom:2px}
+  .inp{min-width:0;flex:1;font-size:16px} /* 16px evita o zoom automático ao focar no iOS */
+  .sel{flex:1;min-width:0;font-size:16px}
+  .impexp{width:100%;gap:8px}
+  .impexp .btn2{flex:1 1 100%;text-align:center;padding:11px}
+
+  /* chips de estratégicos em uma linha rolável, em vez de várias linhas empilhadas */
+  .stratbar{padding:0 15px 12px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .stratbar::-webkit-scrollbar{display:none}
+  .stratbar .slab,.stratchip{flex-shrink:0}
+
+  .stage{padding:0 15px 18px;display:block;flex:none}
+  .mapcard{height:60vh;min-height:360px;border-radius:16px}
+
+  /* legenda: some por padrão no celular (cobria o mapa); abre sob toque */
+  .legtoggle{display:flex;align-items:center;gap:5px;position:absolute;bottom:14px;left:14px;z-index:601;
+    background:rgba(255,255,255,.94);border:1px solid var(--hair);border-radius:20px;padding:8px 13px;
+    font-size:11.5px;font-weight:800;color:var(--ink2);box-shadow:0 3px 10px rgba(33,64,154,.14)}
+  .leg{display:none;bottom:56px;max-width:78vw;max-height:44vh;overflow-y:auto}
+  .leg.on{display:block}
+
+  /* gaveta vira folha inferior fixa na viewport (funciona mesmo com a página rolada) */
+  .scrim{position:fixed}
+  .drawer{position:fixed;left:0;right:0;top:auto;bottom:0;width:100%;max-width:100%;height:88vh;max-height:88vh;
+    transform:translateY(103%);border-left:none;border-radius:20px 20px 0 0;padding-bottom:env(safe-area-inset-bottom)}
   .drawer.on{transform:translateY(0)}
 }
 @media(prefers-reduced-motion:reduce){.dot{animation:none}}
@@ -266,7 +304,8 @@ button,.stratchip,.toggle,.clr,.btn2,.stratmk,.leaflet-control-zoom a{touch-acti
   <div class="mapcard">
     <div id="map"></div>
     <div class="hud" id="hud">Carregando malha de Pernambuco…</div>
-    <div class="leg">
+    <button class="legtoggle" id="legToggle" onclick="toggleLegend()" title="Mostrar/ocultar legenda">🎨 Legenda</button>
+    <div class="leg" id="leg">
       <div class="lt">Situação do município</div>
       <div class="li"><span class="sw" style="background:#C3CCDD"></span>Não contactado</div>
       <div class="li"><span class="sw" style="background:#6FCF57"></span>Contactado · sem demandas ainda</div>
@@ -305,6 +344,10 @@ function tick(){var d=new Date();
   document.getElementById('date').textContent=d.toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});}
 tick();setInterval(tick,20000);
 
+// mantém o mapa com o tamanho correto ao girar a tela / redimensionar
+window.addEventListener('resize',function(){if(window.MAP&&MAP.invalidateSize)MAP.invalidateSize();});
+window.addEventListener('orientationchange',function(){setTimeout(function(){if(window.MAP&&MAP.invalidateSize)MAP.invalidateSize();},300);});
+
 var TIPOS_SUGESTOES=["Expansão de rede de água","Contenção de vazamento","Nova ligação de esgoto",
  "Substituição de adutora","Desobstrução de rede coletora","Reparo na rede de distribuição",
  "Instalação de hidrômetros","Regularização de abastecimento","Recomposição de calçamento",
@@ -341,7 +384,7 @@ function colorFor(nome){var st=STATE[nome];if(!st||st.contato.status!=='sim')ret
  return p>=80?'#1E7A52':p>=60?'#3BA76B':p>=40?'#E1A32E':'#C77A1E';}
 function baseStyle(f){var b=borderFor(f);return {fillColor:colorFor(f.properties._nome),fillOpacity:.85,color:b.color,weight:b.weight,opacity:1};}
 
-MAP=L.map('map',{center:[-8.5,-37.9],zoom:7,zoomControl:false,attributionControl:true,preferCanvas:true});
+MAP=L.map('map',{center:[-8.5,-37.9],zoom:7,zoomControl:false,attributionControl:true});
 L.control.zoom({position:'topright'}).addTo(MAP);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png',
  {attribution:'&copy; OpenStreetMap &copy; CARTO',subdomains:'abcd',maxZoom:19,crossOrigin:true}).addTo(MAP);
@@ -373,6 +416,8 @@ function buildMap(geo,nomeById){var feats=geo.features||[];
   MAP.fitBounds(MAINLAND,{padding:[14,14]});
   buildStrategic();renderKPIs();populateMunClearSelect(feats);
   HUD.textContent=feats.length+' municípios · clique para registrar contato e demandas';
+  // garante que o Leaflet leia a altura real do contêiner (essencial no celular)
+  setTimeout(function(){MAP.invalidateSize();if(MAINLAND&&MAINLAND.isValid())MAP.fitBounds(MAINLAND,{padding:[14,14]});},250);
 }
 
 function populateMunClearSelect(feats){
@@ -432,12 +477,15 @@ function canalOptions(sel){return '<option value="">Selecione…</option>'+CANAI
 function statusOptions(sel){return ['recv','prog','done'].map(function(k){return '<option value="'+k+'"'+(k===sel?' selected':'')+'>'+STL[k]+'</option>';}).join('');}
 var SELCOR='#8DC63F';
 function selectMun(layer,nome){if(SEL&&SEL!==layer)GEO.resetStyle(SEL);
-  SEL=layer;layer.setStyle({weight:2.6,color:'#15244E',fillOpacity:.96,fillColor:SELCOR});layer.bringToFront();openDrawer(nome);}
+  SEL=layer;layer.setStyle({weight:2.6,color:'#15244E',fillOpacity:.96,fillColor:SELCOR});layer.bringToFront();openDrawer(nome);
+  var leg=document.getElementById('leg');if(leg)leg.classList.remove('on');}
+function toggleLegend(){var leg=document.getElementById('leg');if(leg)leg.classList.toggle('on');}
 function openDrawer(nome){CURRENT=nome;ensureMun(nome);
   document.getElementById('dMun').textContent=nome;
   refreshMeta();
   renderDrawerBody();
-  document.getElementById('drawer').classList.add('on');document.getElementById('scrim').classList.add('on');}
+  document.getElementById('drawer').classList.add('on');document.getElementById('scrim').classList.add('on');
+  document.body.classList.add('drawer-open');}
 function refreshMeta(){var st=STATE[CURRENT],sim=st.contato.status==='sim';
   document.getElementById('dMeta').innerHTML='<span class="badgecon '+(sim?'sim':'nao')+'">'+(sim?'✓ Contactado':'○ Não contactado')+'</span>'+(isStrat(CURRENT)?' <span style="color:var(--verde);font-weight:800;margin-left:4px">★ estratégico</span>':'');}
 function renderDrawerBody(){var st=STATE[CURRENT];
@@ -509,6 +557,7 @@ function renderList(){var st=STATE[CURRENT];var el=document.getElementById('dLis
     '<div class="cmeta">'+(d.canal?'<span>via <b>'+esc(d.canal)+'</b></span>':'')+(d.data?'<span>🗓 '+fmtDate(d.data)+'</span>':'')+'</div>'+
    '</div>';}).join('');}
 function closeDrawer(){document.getElementById('drawer').classList.remove('on');document.getElementById('scrim').classList.remove('on');
+  document.body.classList.remove('drawer-open');
   if(SEL){GEO.resetStyle(SEL);SEL=null;}CURRENT=null;}
 
 function refreshSelColor(){if(SEL)SEL.setStyle({fillColor:SELCOR});}
@@ -566,27 +615,38 @@ function capturarMapaImg(){
           try{ctx.drawImage(img,(r.left-mapRect.left)*scale,(r.top-mapRect.top)*scale,r.width*scale,r.height*scale);}catch(e){}
         });
 
-        // 2) polígonos dos municípios (renderizados pelo próprio Leaflet num <canvas>)
-        var vecCanvas=mapEl.querySelector('.leaflet-overlay-pane canvas');
-        if(vecCanvas){
-          var vr=vecCanvas.getBoundingClientRect();
-          ctx.drawImage(vecCanvas,(vr.left-mapRect.left)*scale,(vr.top-mapRect.top)*scale,vr.width*scale,vr.height*scale);
+        function desenharMarcadoresEFinalizar(){
+          // 3) marcadores estratégicos (pino azul com estrela)
+          mapEl.querySelectorAll('.stratmk .pin').forEach(function(pin){
+            var pr=pin.getBoundingClientRect();
+            var cx=(pr.left+pr.width/2-mapRect.left)*scale,cy=(pr.top+pr.height/2-mapRect.top)*scale;
+            var raio=(pr.width/2)*scale;
+            ctx.beginPath();ctx.arc(cx,cy,raio,0,2*Math.PI);
+            ctx.fillStyle='#21409A';ctx.fill();
+            ctx.lineWidth=Math.max(1,scale);ctx.strokeStyle='#fff';ctx.stroke();
+            ctx.fillStyle='#fff';ctx.font=(raio*1.15)+'px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+            ctx.fillText('★',cx,cy+raio*0.05);
+          });
+          mapEl.classList.remove('capturing');
+          resolve(canvas.toDataURL('image/png'));
         }
 
-        // 3) marcadores estratégicos (pino azul com estrela)
-        mapEl.querySelectorAll('.stratmk .pin').forEach(function(pin){
-          var pr=pin.getBoundingClientRect();
-          var cx=(pr.left+pr.width/2-mapRect.left)*scale,cy=(pr.top+pr.height/2-mapRect.top)*scale;
-          var raio=(pr.width/2)*scale;
-          ctx.beginPath();ctx.arc(cx,cy,raio,0,2*Math.PI);
-          ctx.fillStyle='#21409A';ctx.fill();
-          ctx.lineWidth=Math.max(1,scale);ctx.strokeStyle='#fff';ctx.stroke();
-          ctx.fillStyle='#fff';ctx.font=(raio*1.15)+'px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
-          ctx.fillText('★',cx,cy+raio*0.05);
-        });
-
-        mapEl.classList.remove('capturing');
-        resolve(canvas.toDataURL('image/png'));
+        // 2) polígonos dos municípios — o Leaflet desenha isso como SVG; rasterizamos
+        //    o SVG só neste momento (sem alterar como o mapa se comporta na tela/celular)
+        var svgEl=mapEl.querySelector('.leaflet-overlay-pane svg');
+        if(svgEl){
+          var xml=new XMLSerializer().serializeToString(svgEl);
+          var svgImg=new Image();
+          svgImg.onload=function(){
+            var vr=svgEl.getBoundingClientRect();
+            try{ctx.drawImage(svgImg,(vr.left-mapRect.left)*scale,(vr.top-mapRect.top)*scale,vr.width*scale,vr.height*scale);}catch(e){}
+            desenharMarcadoresEFinalizar();
+          };
+          svgImg.onerror=desenharMarcadoresEFinalizar;
+          svgImg.src='data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(xml)));
+        }else{
+          desenharMarcadoresEFinalizar();
+        }
       }catch(e){
         mapEl.classList.remove('capturing');
         console.error('Falha ao capturar o mapa:',e);
