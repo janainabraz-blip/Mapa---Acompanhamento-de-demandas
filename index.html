@@ -712,14 +712,37 @@ function capturarMapaImg(){
               ctx.fillStyle=op.fillColor;ctx.fill('evenodd');ctx.globalAlpha=1;
             }
             if(op.color&&op.weight){
-              ctx.strokeStyle=op.color;ctx.lineWidth=Math.max(1,op.weight*scale);ctx.stroke();
+              var _bc=op.color,_bw=op.weight;
+              if(layer.feature&&layer.feature.properties&&layer.feature.properties._strat){_bc='#fff';_bw=.7;}
+              ctx.strokeStyle=_bc;ctx.lineWidth=Math.max(1,_bw*scale);ctx.stroke();
             }
           });
         }
 
         mapEl.classList.remove('capturing');
+
+        // Reduz a altura do quadro do mapa recortando o excesso de área vazia acima/abaixo
+        // do estado (entorno da malha continental), mantendo a MESMA escala de exibição.
+        var outCanvas=canvas;
         try{
-          var dataUrl=canvas.toDataURL('image/png');
+          if(MAINLAND&&MAINLAND.isValid()){
+            var pN=MAP.latLngToContainerPoint(MAINLAND.getNorthWest());
+            var pS=MAP.latLngToContainerPoint(MAINLAND.getSouthWest());
+            var padY=8;
+            var topY=Math.max(0,Math.min(pN.y,pS.y)-padY);
+            var botY=Math.min(mapRect.height,Math.max(pN.y,pS.y)+padY);
+            var hCrop=botY-topY;
+            if(hCrop>40&&hCrop<mapRect.height-4){
+              var cc=document.createElement('canvas');
+              cc.width=canvas.width;cc.height=Math.round(hCrop*scale);
+              cc.getContext('2d').drawImage(canvas,0,Math.round(topY*scale),canvas.width,Math.round(hCrop*scale),0,0,canvas.width,Math.round(hCrop*scale));
+              outCanvas=cc;
+            }
+          }
+        }catch(errCrop){console.error('Falha ao recortar o mapa (usando imagem cheia)',errCrop);}
+
+        try{
+          var dataUrl=outCanvas.toDataURL('image/png');
           if(!dataUrl||dataUrl.length<1000){resolve({url:null,err:'A captura gerou uma imagem vazia.'});return;}
           resolve({url:dataUrl,err:null});
         }catch(errExport){
