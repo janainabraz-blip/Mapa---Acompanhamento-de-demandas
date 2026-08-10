@@ -800,6 +800,10 @@ function exportarRelatorioPDF(btn){
     }).sort(function(a,b){return norm(a).localeCompare(norm(b));});
     var listaCompleta=prioritarios.concat(contactadosExtra).filter(function(m){
       return !!contactedSet[norm(m)];
+    }).sort(function(a,b){
+      var ra=isRMR(a)?0:1, rb=isRMR(b)?0:1;
+      if(ra!==rb)return ra-rb;
+      return norm(a).localeCompare(norm(b));
     });
     var pendHTML='';
     if(listaCompleta.length){
