@@ -237,8 +237,8 @@ button,.stratchip,.toggle,.clr,.btn2,.stratmk,.leaflet-control-zoom a{touch-acti
   #printReport .reppendhead{font-size:12px;font-weight:900;color:#182F73;border-bottom:2px solid #21409A;padding-bottom:5px;margin-bottom:10px}
   #printReport .reppendhead .prazo{color:#15244E;font-weight:900;padding:0 5px;box-decoration-break:clone;-webkit-box-decoration-break:clone;
     background:linear-gradient(transparent 14%, #FFE86B 14%, #FFE86B 88%, transparent 88%);-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  #printReport .reppendlist{display:flex;flex-wrap:wrap;gap:5px 18px}
-  #printReport .reppenditem{display:flex;align-items:center;gap:8px;width:calc(50% - 9px);font-size:11px;font-weight:700;color:#15244E;padding:3px 0}
+  #printReport .reppendlist{column-count:2;column-gap:18px}
+  #printReport .reppenditem{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;color:#15244E;padding:3px 0;break-inside:avoid;-webkit-column-break-inside:avoid}
   #printReport .reppenditem .chk{width:11px;height:11px;border:1.5px solid #21409A;border-radius:2px;flex-shrink:0;-webkit-print-color-adjust:exact;print-color-adjust:exact;position:relative}
   #printReport .reppenditem .chk.on{background:#5EA023;border-color:#5EA023}
   #printReport .reppenditem .chk.on::after{content:"\2713";position:absolute;left:50%;top:50%;transform:translate(-50%,-56%);font-size:9px;line-height:1;color:#fff;font-weight:900}
